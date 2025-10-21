@@ -13,12 +13,149 @@
         .table-container.loaded {
             opacity: 1;
         }
+        
+        .custom-table {
+            width: 100%;
+            min-width: 2400px; /* Aumentado para acomodar todas las columnas */
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .custom-table th {
+            background: #f8fafc;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+        
+        .custom-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .custom-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .btn-edit {
+            background: #10b981;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-right: 8px;
+        }
+        
+        .btn-edit:hover {
+            background: #059669;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #9ca3af;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .counter-text {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .controls-container {
+             display: flex;
+             justify-content: flex-start;
+             align-items: center;
+             margin-bottom: 20px;
+             gap: 16px;
+         }
+        
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        /* Estilos para el scrollbar */
+        .table-wrapper::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
     </style>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
-                <div class="p-6 text-gray-900 min-w-full table-container" id="tableContainer">
+                <div class="p-6 text-gray-900 table-container" id="tableContainer">
                     <div x-data="{
                         searchQuery: '',
                         totalRows: {{ $tramites->count() }},
@@ -49,271 +186,125 @@
                             });
                             this.visibleRows = visible;
                         }
-                    }" 
-                    x-init="$watch('searchQuery', () => filterRows())" 
-                    class="w-full min-w-0">
+                    }" x-init="filterRows()">
                     
-                    <!-- Controles de búsqueda y contador -->
-                    <div class="mb-6 px-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 justify-between min-w-max">
-                        <div class="flex items-center gap-4 flex-1">
-                            <div class="relative flex-1 max-w-md">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div class="w-full min-w-0">
+                        
+                        <!-- Controles superiores -->
+                        <div class="controls-container">
+                            <div class="search-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                                 <input 
                                     type="text" 
-                                    x-model="searchQuery" 
-                                    placeholder="Buscar en todas las columnas..." 
-                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300"
+                                    x-model="searchQuery"
+                                    @input="filterRows()"
+                                    placeholder="Buscar trámites..." 
+                                    class="search-input"
                                 />
                             </div>
                             
                             <!-- Contador de filas visibles -->
-                            <div class="text-sm text-gray-600 whitespace-nowrap">
+                            <div class="counter-text">
                                 <span x-text="`Mostrando ${visibleRows} de ${totalRows}`"></span>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Scrollbar superior sincronizado -->
-                    <div class="mb-2 px-4">
-                        <div x-ref="topScroll" 
-                             @scroll="$refs.tableContainer.scrollLeft = $refs.topScroll.scrollLeft"
-                             class="overflow-x-auto rounded bg-gray-50"
-                             style="height: 20px;">
-                            <div :style="`width: ${$refs.tableContainer?.scrollWidth || 0}px; height: 1px;`"></div>
-                        </div>
-                    </div>
-
-                    <!-- Tabla de datos -->
-                    <div x-ref="tableContainer"
-                         @scroll="$refs.topScroll.scrollLeft = $refs.tableContainer.scrollLeft"
-                         class="overflow-x-auto">
-                        <table class="w-full divide-y divide-gray-200 min-w-max">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clave dependencia siglas</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clave trámite</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variante</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uso reservado</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fundamento legal</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vigencia trámite de</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vigencia trámite al</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vigencia línea captura</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo vigencia</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clave contable</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Obligatorio</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agrupador</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo agrupador</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clave periodicidad</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clave periodo</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre monto</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Variable</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cuota</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IVA</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monto IVA</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actualización</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recargos</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Multa corrección fiscal</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compensación</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saldo a favor</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actualizado</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody x-ref="tableBody" class="bg-white divide-y divide-gray-200">
-                                @forelse($tramites as $t)
-                                    <tr x-data="{ openEdit: false, openDelete: false }">
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->id }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->clave_dependencia_siglas }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->clave_tramite }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->variante }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->descripcion }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->tramite_usoreservado }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900 max-w-xs truncate" title="{{ Str::limit($t->fundamento_legal, 100) }}">{{ Str::limit($t->fundamento_legal, 50) }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->vigencia_tramite_de }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->vigencia_tramite_al }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->vigencia_lineacaptura }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->tipo_vigencia }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->clave_contable }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->obligatorio }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->agrupador }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->tipo_agrupador }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->clave_periodicidad }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->clave_periodo }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->nombre_monto }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->variable }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->cuota }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->iva }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->monto_iva }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->actualizacion }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->recargos }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->multa_correccionfiscal }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->compensacion }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-900">{{ $t->saldo_favor }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-500">{{ optional($t->created_at)->format('Y-m-d H:i') }}</td>
-                                        <td class="px-4 py-2 text-sm text-gray-500">{{ optional($t->updated_at)->format('Y-m-d H:i') }}</td>
-                                        <td class="px-4 py-2 text-sm">
-                                            <button @click="openEdit = true" class="inline-flex items-center px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded hover:bg-indigo-700">Editar</button>
-                                            <button @click="openDelete = true" class="inline-flex items-center px-3 py-1 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 ms-2">Eliminar</button>
-
-                                            <!-- Modal Editar -->
-                                            <div x-show="openEdit" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                                                <div @click="openEdit = false" class="absolute inset-0 bg-black bg-opacity-50"></div>
-                                                <div class="bg-white w-full max-w-4xl max-h-[85vh] overflow-y-auto rounded shadow-lg z-10">
-                                                    <div class="px-6 py-4 border-b">
-                                                        <h3 class="text-lg font-semibold">Editar trámite #{{ $t->id }}</h3>
-                                                    </div>
-                                                    <form method="POST" action="{{ route('tramites.update', $t) }}" class="px-6 py-4">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Clave dependencia siglas</label>
-                                                                <input type="text" name="clave_dependencia_siglas" value="{{ $t->clave_dependencia_siglas }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Clave trámite</label>
-                                                                <input type="text" name="clave_tramite" value="{{ $t->clave_tramite }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Variante</label>
-                                                                <input type="text" name="variante" value="{{ $t->variante }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div class="md:col-span-2">
-                                                                <label class="block text-sm font-medium text-gray-700">Descripción</label>
-                                                                <textarea name="descripcion" class="mt-1 block w-full rounded border-gray-300" rows="3">{{ $t->descripcion }}</textarea>
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Uso reservado</label>
-                                                                <input type="text" name="tramite_usoreservado" value="{{ $t->tramite_usoreservado }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div class="md:col-span-2">
-                                                                <label class="block text-sm font-medium text-gray-700">Fundamento legal</label>
-                                                                <textarea name="fundamento_legal" class="mt-1 block w-full rounded border-gray-300" rows="3">{{ $t->fundamento_legal }}</textarea>
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Vigencia trámite de</label>
-                                                                <input type="text" name="vigencia_tramite_de" value="{{ $t->vigencia_tramite_de }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Vigencia trámite al</label>
-                                                                <input type="text" name="vigencia_tramite_al" value="{{ $t->vigencia_tramite_al }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Vigencia línea captura</label>
-                                                                <input type="text" name="vigencia_lineacaptura" value="{{ $t->vigencia_lineacaptura }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Tipo vigencia</label>
-                                                                <input type="text" name="tipo_vigencia" value="{{ $t->tipo_vigencia }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Clave contable</label>
-                                                                <input type="text" name="clave_contable" value="{{ $t->clave_contable }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Obligatorio</label>
-                                                                <input type="text" name="obligatorio" value="{{ $t->obligatorio }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Agrupador</label>
-                                                                <input type="text" name="agrupador" value="{{ $t->agrupador }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Tipo agrupador</label>
-                                                                <input type="text" name="tipo_agrupador" value="{{ $t->tipo_agrupador }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Clave periodicidad</label>
-                                                                <input type="text" name="clave_periodicidad" value="{{ $t->clave_periodicidad }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Clave periodo</label>
-                                                                <input type="text" name="clave_periodo" value="{{ $t->clave_periodo }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Nombre monto</label>
-                                                                <input type="text" name="nombre_monto" value="{{ $t->nombre_monto }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Variable</label>
-                                                                <input type="text" name="variable" value="{{ $t->variable }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Cuota</label>
-                                                                <input type="text" name="cuota" value="{{ $t->cuota }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">IVA</label>
-                                                                <input type="text" name="iva" value="{{ $t->iva }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Monto IVA</label>
-                                                                <input type="text" name="monto_iva" value="{{ $t->monto_iva }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Actualización</label>
-                                                                <input type="text" name="actualizacion" value="{{ $t->actualizacion }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Recargos</label>
-                                                                <input type="text" name="recargos" value="{{ $t->recargos }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Multa corrección fiscal</label>
-                                                                <input type="text" name="multa_correccionfiscal" value="{{ $t->multa_correccionfiscal }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Compensación</label>
-                                                                <input type="text" name="compensacion" value="{{ $t->compensacion }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                            <div>
-                                                                <label class="block text-sm font-medium text-gray-700">Saldo a favor</label>
-                                                                <input type="text" name="saldo_favor" value="{{ $t->saldo_favor }}" class="mt-1 block w-full rounded border-gray-300" />
-                                                            </div>
-                                                        </div>
-                                                        <div class="flex justify-end gap-2 mt-4">
-                                                            <button type="button" @click="openEdit = false" class="px-4 py-2 rounded border">Cancelar</button>
-                                                            <button type="submit" class="px-4 py-2 rounded bg-indigo-600 text-white">Guardar</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-
-                                            <!-- Modal Eliminar -->
-                                            <div x-show="openDelete" x-cloak class="fixed inset-0 z-50 flex items-center justify-center">
-                                                <div @click="openDelete = false" class="absolute inset-0 bg-black bg-opacity-50"></div>
-                                                <div class="bg-white w-full max-w-md rounded shadow-lg z-10">
-                                                    <div class="px-6 py-4 border-b">
-                                                        <h3 class="text-lg font-semibold">Eliminar trámite #{{ $t->id }}</h3>
-                                                    </div>
-                                                    <div class="px-6 py-4">
-                                                        <p class="text-sm text-gray-700">¿Confirma eliminar el trámite: "{{ $t->descripcion }}"?</p>
-                                                    </div>
-                                                    <form method="POST" action="{{ route('tramites.destroy', $t) }}" class="px-6 pb-4 flex justify-end gap-2">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="button" @click="openDelete = false" class="px-4 py-2 rounded border">Cancelar</button>
-                                                        <button type="submit" class="px-4 py-2 rounded bg-red-600 text-white">Eliminar</button>
-                                                    </form>
-                                                </div>
+                        <!-- Tabla de datos -->
+                        <div class="table-wrapper">
+                            <table class="custom-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Clave Dependencia Siglas</th>
+                                        <th>Clave Trámite</th>
+                                        <th>Variante</th>
+                                        <th>Descripción</th>
+                                        <th>Uso Reservado</th>
+                                        <th>Fundamento Legal</th>
+                                        <th>Vigencia Trámite De</th>
+                                        <th>Vigencia Trámite Al</th>
+                                        <th>Vigencia Línea Captura</th>
+                                        <th>Tipo Vigencia</th>
+                                        <th>Clave Contable</th>
+                                        <th>Obligatorio</th>
+                                        <th>Agrupador</th>
+                                        <th>Tipo Agrupador</th>
+                                        <th>Clave Periodicidad</th>
+                                        <th>Clave Periodo</th>
+                                        <th>Nombre Monto</th>
+                                        <th>Variable</th>
+                                        <th>Cuota</th>
+                                        <th>IVA</th>
+                                        <th>Monto IVA</th>
+                                        <th>Actualización</th>
+                                        <th>Recargos</th>
+                                        <th>Multa Corrección Fiscal</th>
+                                        <th>Compensación</th>
+                                        <th>Saldo a Favor</th>
+                                        <th>Creado</th>
+                                        <th>Actualizado</th>
+                                        <th style="text-align: center;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody x-ref="tableBody">
+                                    @foreach($tramites as $tramite)
+                                    <tr data-row>
+                                        <td>{{ $tramite->id }}</td>
+                                        <td>{{ $tramite->clave_dependencia_siglas }}</td>
+                                        <td>{{ $tramite->clave_tramite }}</td>
+                                        <td>{{ $tramite->variante }}</td>
+                                        <td>{{ $tramite->descripcion }}</td>
+                                        <td>{{ $tramite->tramite_usoreservado }}</td>
+                                        <td>{{ $tramite->fundamento_legal }}</td>
+                                        <td class="text-gray-500">{{ $tramite->vigencia_tramite_de }}</td>
+                                        <td class="text-gray-500">{{ $tramite->vigencia_tramite_al }}</td>
+                                        <td>{{ $tramite->vigencia_lineacaptura }}</td>
+                                        <td>{{ $tramite->tipo_vigencia }}</td>
+                                        <td>{{ $tramite->clave_contable }}</td>
+                                        <td>{{ $tramite->obligatorio ? 'Sí' : 'No' }}</td>
+                                        <td>{{ $tramite->agrupador }}</td>
+                                        <td>{{ $tramite->tipo_agrupador }}</td>
+                                        <td>{{ $tramite->clave_periodicidad }}</td>
+                                        <td>{{ $tramite->clave_periodo }}</td>
+                                        <td>{{ $tramite->nombre_monto }}</td>
+                                        <td>{{ $tramite->variable ? 'Sí' : 'No' }}</td>
+                                        <td>${{ number_format($tramite->cuota, 2) }}</td>
+                                        <td>{{ $tramite->iva ? 'Sí' : 'No' }}</td>
+                                        <td>${{ number_format($tramite->monto_iva, 2) }}</td>
+                                        <td>{{ $tramite->actualizacion ? 'Sí' : 'No' }}</td>
+                                        <td>{{ $tramite->recargos ? 'Sí' : 'No' }}</td>
+                                        <td>{{ $tramite->multa_correccionfiscal ? 'Sí' : 'No' }}</td>
+                                        <td>{{ $tramite->compensacion ? 'Sí' : 'No' }}</td>
+                                        <td>{{ $tramite->saldo_favor ? 'Sí' : 'No' }}</td>
+                                        <td class="text-gray-500">{{ $tramite->created_at->format('d/m/Y') }}</td>
+                                        <td class="text-gray-500">{{ $tramite->updated_at->format('d/m/Y') }}</td>
+                                        <td style="text-align: center;">
+                                            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                                <button 
+                                                    @click="editTramite({{ $tramite->id }})"
+                                                    class="btn-edit"
+                                                >
+                                                    Editar
+                                                </button>
+                                                <button 
+                                                    @click="deleteTramite({{ $tramite->id }}, '{{ $tramite->descripcion }}')"
+                                                    class="btn-delete"
+                                                >
+                                                    Eliminar
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="30" class="px-4 py-6 text-center text-sm text-gray-500">No hay registros de trámites.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">
-                        {{ $tramites->links() }}
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4">
+                            {{ $tramites->links() }}
+                        </div>
                     </div>
                 </div>
             </div>

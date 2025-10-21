@@ -22,6 +22,23 @@ class AdminController extends Controller
     }
 
     /**
+     * Crea una nueva dependencia.
+     */
+    public function dependenciaStore(Request $request)
+    {
+        $validated = $request->validate([
+            'nombre' => ['required','string','max:255'],
+            'clave_dependencia' => ['required','string','max:255'],
+            'unidad_administrativa' => ['nullable','string','max:255'],
+        ]);
+
+        Dependencia::create($validated);
+        Cache::forget('dependencias:list');
+
+        return redirect()->route('dependencias.index')->with('success', 'Dependencia creada correctamente.');
+    }
+
+    /**
      * Actualiza una dependencia.
      */
     public function dependenciaUpdate(Request $request, Dependencia $dependencia)
@@ -35,7 +52,7 @@ class AdminController extends Controller
         $dependencia->update($validated);
         Cache::forget('dependencias:list');
 
-        return redirect()->route('dependencias.index')->with('status', __('Dependencia actualizada correctamente.'));
+        return redirect()->route('dependencias.index')->with('success', 'Dependencia actualizada correctamente.');
     }
 
     /**
@@ -46,7 +63,7 @@ class AdminController extends Controller
         $dependencia->delete();
         Cache::forget('dependencias:list');
 
-        return redirect()->route('dependencias.index')->with('status', __('Dependencia eliminada correctamente.'));
+        return redirect()->route('dependencias.index')->with('success', 'Dependencia eliminada correctamente.');
     }
 
     /**
@@ -126,7 +143,7 @@ class AdminController extends Controller
         $tramite->update($validated);
         Cache::forget('tramites:list');
 
-        return redirect()->route('tramites')->with('status', __('Trámite actualizado correctamente.'));
+        return redirect()->route('tramites')->with('success', 'Trámite actualizado correctamente.');
     }
 
     /**
@@ -137,7 +154,7 @@ class AdminController extends Controller
         $tramite->delete();
         Cache::forget('tramites:list');
 
-        return redirect()->route('tramites')->with('status', __('Trámite eliminado correctamente.'));
+        return redirect()->route('tramites')->with('success', 'Trámite eliminado correctamente.');
     }
 
     /**

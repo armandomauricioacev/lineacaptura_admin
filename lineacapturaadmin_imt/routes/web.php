@@ -15,6 +15,9 @@ Route::get('/dashboard', function () {
 Route::get('/dependencias', [AdminController::class, 'dependenciasIndex'])
     ->middleware(['auth', 'verified'])->name('dependencias.index');
 
+Route::post('/dependencias', [AdminController::class, 'dependenciaStore'])
+    ->middleware(['auth', 'verified'])->name('dependencias.store');
+
 Route::put('/dependencias/{dependencia}', [AdminController::class, 'dependenciaUpdate'])
     ->middleware(['auth', 'verified'])->name('dependencias.update');
 
