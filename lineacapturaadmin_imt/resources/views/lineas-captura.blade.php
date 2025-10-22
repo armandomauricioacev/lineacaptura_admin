@@ -233,7 +233,27 @@
             border-radius: 8px;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             width: 380px;
+            max-height: 500px;
+            overflow-y: auto;
             z-index: 50;
+        }
+        
+        .filter-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .filter-panel::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .filter-panel::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .filter-panel::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
         
         .filter-header {
@@ -470,6 +490,8 @@
                         deleteSolicitud: null,
                         totalRows: {{ $totalLineas }},
                         filteredRows: {{ $lineas->count() }},
+                        visibleRows: {{ $lineas->count() }},
+                        searchQuery: '',
                         showFilters: false,
                         filters: {
                             tipoPersona: '{{ request('tipo_persona', '') }}',
@@ -533,6 +555,33 @@
                                    this.filters.importeMin || this.filters.importeMax ||
                                    this.filters.orden;
                         },
+                        normalize(text) {
+                            return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        },
+                        filterRowsBySearch() {
+                            const query = this.normalize(this.searchQuery);
+                            const rows = this.$refs.tableBody.querySelectorAll('tr[data-row]');
+                            let visible = 0;
+                            
+                            rows.forEach(row => {
+                                if (!query) {
+                                    row.style.display = '';
+                                    visible++;
+                                } else {
+                                    const cells = row.querySelectorAll('td');
+                                    const rowText = Array.from(cells).map(cell => this.normalize(cell.textContent)).join(' ');
+                                    
+                                    if (rowText.includes(query)) {
+                                        row.style.display = '';
+                                        visible++;
+                                    } else {
+                                        row.style.display = 'none';
+                                    }
+                                }
+                            });
+                            
+                            this.visibleRows = visible;
+                        },
                         initScrollSync() {
                             this.$nextTick(() => {
                                 const top = this.$refs.topScroll;
@@ -579,7 +628,7 @@
                                 if (wrapper) wrapper.addEventListener('scroll', onWrapperScroll);
                             });
                         }
-                    }" x-init="initScrollSync()">
+                    }" x-init="initScrollSync(); $watch('searchQuery', () => filterRowsBySearch())">
                     
                         @if(session('success'))
                             <div class="alert alert-success">
@@ -599,22 +648,12 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
-                                    <form action="{{ route('lineas-captura') }}" method="GET">
-                                        <input type="hidden" name="tipo_persona" :value="filters.tipoPersona">
-                                        <input type="hidden" name="estado_pago" :value="filters.estadoPago">
-                                        <input type="hidden" name="importe_min" :value="filters.importeMin">
-                                        <input type="hidden" name="importe_max" :value="filters.importeMax">
-                                        <input type="hidden" name="fecha_desde" :value="filters.fechaDesde">
-                                        <input type="hidden" name="fecha_hasta" :value="filters.fechaHasta">
-                                        <input type="hidden" name="orden" :value="filters.orden">
-                                        <input 
-                                            type="text" 
-                                            name="search"
-                                            value="{{ request('search') }}"
-                                            placeholder="Buscar líneas de captura..." 
-                                            class="search-input"
-                                        />
-                                    </form>
+                                    <input 
+                                        type="text" 
+                                        x-model="searchQuery"
+                                        placeholder="Buscar líneas de captura..." 
+                                        class="search-input"
+                                    />
                                 </div>
                                 
                                 <div style="position: relative;">
@@ -637,8 +676,8 @@
                                             <div class="form-group">
                                                 <label class="form-label">Ordenar por</label>
                                                 <select x-model="filters.orden" class="form-select">
-                                                    <option value="">Por ID (del 1 al último)</option>
-                                                    <option value="recientes">Las más recientes</option>
+                                                    <option value="">La más antigua</option>
+                                                    <option value="recientes">La más reciente</option>
                                                 </select>
                                             </div>
                                             
@@ -692,7 +731,7 @@
                                 </button>
                                 
                                 <div class="counter-text">
-                                    <span>Mostrando {{ $lineas->count() }} registros de {{ $totalLineas }} líneas de captura generadas</span>
+                                    <span x-text="`Mostrando ${visibleRows} de ${filteredRows} registros`"></span>
                                 </div>
                             </div>
 
@@ -975,7 +1014,7 @@
                                         <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
                                             <p style="font-size: 14px; color: #6b7280; margin-bottom: 8px;"><strong>Filtros aplicados:</strong></p>
                                             <div style="font-size: 13px; color: #374151;">
-                                                <p x-show="filters.orden" style="margin-bottom: 4px;">• <strong>Orden:</strong> <span x-text="filters.orden === 'recientes' ? 'Las más recientes' : 'Por ID (del 1 al último)'"></span></p>
+                                                <p x-show="filters.orden" style="margin-bottom: 4px;">• <strong>Orden:</strong> <span x-text="filters.orden === 'recientes' ? 'La más reciente' : 'La más antigua'"></span></p>
                                                 <p x-show="filters.tipoPersona" style="margin-bottom: 4px;">• <strong>Tipo persona:</strong> <span x-text="filters.tipoPersona === 'F' ? 'Física' : 'Moral'"></span></p>
                                                 <p x-show="filters.estadoPago" style="margin-bottom: 4px;">• <strong>Estado pago:</strong> <span x-text="filters.estadoPago"></span></p>
                                                 <p x-show="filters.importeMin || filters.importeMax" style="margin-bottom: 4px;">• <strong>Rango importe:</strong> $<span x-text="filters.importeMin || '0'"></span> - $<span x-text="filters.importeMax || '∞'"></span></p>
