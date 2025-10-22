@@ -12,6 +12,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// ========== RUTAS DE DEPENDENCIAS ==========
 Route::get('/dependencias', [AdminController::class, 'dependenciasIndex'])
     ->middleware(['auth', 'verified'])->name('dependencias.index');
 
@@ -24,8 +25,15 @@ Route::put('/dependencias/{dependencia}', [AdminController::class, 'dependenciaU
 Route::delete('/dependencias/{dependencia}', [AdminController::class, 'dependenciaDestroy'])
     ->middleware(['auth', 'verified'])->name('dependencias.destroy');
 
+// ========== RUTAS DE TRÁMITES ==========
 Route::get('/tramites', [AdminController::class, 'tramitesIndex'])
     ->middleware(['auth', 'verified'])->name('tramites');
+
+Route::post('/tramites', [AdminController::class, 'tramitesStore'])
+    ->middleware(['auth', 'verified'])->name('tramites.store');
+
+Route::get('/tramites/{tramite}/edit', [AdminController::class, 'tramitesEdit'])
+    ->middleware(['auth', 'verified'])->name('tramites.edit');
 
 Route::put('/tramites/{tramite}', [AdminController::class, 'tramitesUpdate'])
     ->middleware(['auth', 'verified'])->name('tramites.update');
@@ -33,9 +41,18 @@ Route::put('/tramites/{tramite}', [AdminController::class, 'tramitesUpdate'])
 Route::delete('/tramites/{tramite}', [AdminController::class, 'tramitesDestroy'])
     ->middleware(['auth', 'verified'])->name('tramites.destroy');
 
+// ========== RUTAS DE LÍNEAS DE CAPTURA ==========
 Route::get('/lineas-captura', [AdminController::class, 'lineasCapturadasIndex'])
     ->middleware(['auth', 'verified'])->name('lineas-captura');
 
+// IMPORTANTE: Esta ruta debe ir ANTES de la ruta con {linea}
+Route::delete('/lineas-captura/delete-filtered', [AdminController::class, 'lineasCapturaDeleteFiltered'])
+    ->middleware(['auth', 'verified'])->name('lineas-captura.delete-filtered');
+
+Route::delete('/lineas-captura/{linea}', [AdminController::class, 'lineaCapturaDestroy'])
+    ->middleware(['auth', 'verified'])->name('lineas-captura.destroy');
+
+// ========== RUTAS DE PERFIL ==========
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -16,6 +16,7 @@
         
         .custom-table {
             width: 100%;
+            min-width: 1400px; /* Asegura overflow horizontal para scroll */
             border-collapse: collapse;
             background: white;
             border-radius: 8px;
@@ -30,17 +31,61 @@
             font-weight: 600;
             color: #374151;
             border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
         }
         
         .custom-table td {
             padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
+            white-space: nowrap;
         }
         
         .custom-table tr:hover {
             background: #f9fafb;
         }
         
+        /* Contenedor interno de la tabla: scroll horizontal táctil, sin barra interna */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE/Edge */
+            touch-action: pan-x;
+            overscroll-behavior-x: contain;
+        }
+        .table-wrapper::-webkit-scrollbar { display: none; }
+        
+        /* Barras externas superior e inferior */
+        .table-scroll-top,
+        .table-scroll-bottom {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            height: 12px;
+            touch-action: pan-x;
+        }
+        .table-scroll-top { margin-bottom: 8px; }
+        .table-scroll-bottom { margin-top: 8px; }
+        .table-scroll-top::-webkit-scrollbar,
+        .table-scroll-bottom::-webkit-scrollbar { height: 8px; }
+        .table-scroll-top::-webkit-scrollbar-track,
+        .table-scroll-bottom::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .table-scroll-top::-webkit-scrollbar-thumb,
+        .table-scroll-bottom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-scroll-top::-webkit-scrollbar-thumb:hover,
+        .table-scroll-bottom::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+ 
+ /* Ocultar scrollbar del contenedor interno (usamos barras externas) */
+ .table-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
+ .table-wrapper::-webkit-scrollbar { display: none; }
+ 
         .btn-primary {
             background: #3b82f6;
             color: white;
@@ -270,8 +315,35 @@
                         openDeleteModal(id, nombre) {
                             this.deleteData = { id, nombre };
                             this.showDeleteModal = true;
+                        },
+                        initScrollSync() {
+                            this.$nextTick(() => {
+                                const top = this.$refs.topScroll;
+                                const innerTop = this.$refs.topScrollInner;
+                                const bottom = this.$refs.bottomScroll;
+                                const innerBottom = this.$refs.bottomScrollInner;
+                                const wrapper = this.$refs.tableWrapper;
+                                const table = this.$refs.customTable;
+                                const updateWidths = () => {
+                                    if (table) {
+                                        const w = table.scrollWidth;
+                                        if (innerTop) { innerTop.style.width = w + 'px'; innerTop.style.height = '1px'; }
+                                        if (innerBottom) { innerBottom.style.width = w + 'px'; innerBottom.style.height = '1px'; }
+                                    }
+                                };
+                                updateWidths();
+                                window.addEventListener('resize', updateWidths);
+                                let syncing = false;
+                                const setScroll = (el, val) => { if (el && el.scrollLeft !== val) el.scrollLeft = val; };
+                                const onTopScroll = () => { if (syncing) return; syncing = true; setScroll(wrapper, top.scrollLeft); setScroll(bottom, top.scrollLeft); syncing = false; };
+                                const onBottomScroll = () => { if (syncing) return; syncing = true; setScroll(wrapper, bottom.scrollLeft); setScroll(top, bottom.scrollLeft); syncing = false; };
+                                const onWrapperScroll = () => { if (syncing) return; syncing = true; setScroll(top, wrapper.scrollLeft); setScroll(bottom, wrapper.scrollLeft); syncing = false; };
+                                if (top) top.addEventListener('scroll', onTopScroll);
+                                if (bottom) bottom.addEventListener('scroll', onBottomScroll);
+                                if (wrapper) wrapper.addEventListener('scroll', onWrapperScroll);
+                            });
                         }
-                    }" x-init="filterRows()">
+                    }" x-init="filterRows(); initScrollSync()">
                     
                     <!-- Mensajes de éxito/error -->
                     @if(session('success'))
@@ -322,8 +394,11 @@
                     </div>
 
                     <!-- Tabla de datos -->
-                    <div class="table-wrapper">
-                        <table class="custom-table">
+                    <div class="table-scroll-top" x-ref="topScroll">
+                        <div class="table-scroll-inner" x-ref="topScrollInner"></div>
+                    </div>
+                    <div class="table-wrapper" x-ref="tableWrapper">
+                        <table class="custom-table" x-ref="customTable">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -364,6 +439,11 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Barra de desplazamiento inferior -->
+                    <div class="table-scroll-bottom" x-ref="bottomScroll">
+                        <div class="table-scroll-inner" x-ref="bottomScrollInner"></div>
                     </div>
 
                     <!-- Paginación -->
