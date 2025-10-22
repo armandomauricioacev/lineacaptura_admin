@@ -250,9 +250,6 @@ class AdminController extends Controller
      */
     public function lineasCapturadasIndex(Request $request)
     {
-        // Obtener el total de líneas sin filtros
-        $totalLineas = LineaCapturada::count();
-
         $query = LineaCapturada::select(
             'id',
             'tipo_persona',
@@ -305,11 +302,11 @@ class AdminController extends Controller
         }
 
         if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha_vigencia', '>=', $request->fecha_desde);
+            $query->whereDate('fecha_solicitud', '>=', $request->fecha_desde);
         }
 
         if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha_vigencia', '<=', $request->fecha_hasta);
+            $query->whereDate('fecha_solicitud', '<=', $request->fecha_hasta);
         }
 
         // Búsqueda general
@@ -326,15 +323,12 @@ class AdminController extends Controller
             });
         }
 
-        // Ordenar según el filtro de orden
-        if ($request->filled('orden') && $request->orden === 'recientes') {
-            $lineas = $query->orderBy('id', 'desc')->get();
-        } else {
-            // Por defecto: más antigua (por ID ascendente)
-            $lineas = $query->orderBy('id', 'asc')->get();
-        }
+        // Ordenar por fecha_solicitud (más reciente primero) y luego por ID
+        $lineas = $query->orderBy('fecha_solicitud', 'desc')
+                       ->orderBy('id', 'asc')
+                       ->get();
 
-        return view('lineas-captura', compact('lineas', 'totalLineas'));
+        return view('lineas-captura', compact('lineas'));
     }
 
     /**
