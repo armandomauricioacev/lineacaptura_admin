@@ -441,11 +441,6 @@
                         </table>
                     </div>
 
-                    <!-- Barra de desplazamiento inferior -->
-                    <div class="table-scroll-bottom" x-ref="bottomScroll">
-                        <div class="table-scroll-inner" x-ref="bottomScrollInner"></div>
-                    </div>
-
                     <!-- Paginación -->
                     @if($dependencias->hasPages())
                         <div style="margin-top: 20px;">
