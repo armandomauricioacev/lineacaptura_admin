@@ -478,7 +478,7 @@
                             importeMax: '{{ request('importe_max', '') }}',
                             fechaDesde: '{{ request('fecha_desde', '') }}',
                             fechaHasta: '{{ request('fecha_hasta', '') }}',
-                            orden: '{{ request('orden', '') }}'
+                            orden: '{{ request('orden', 'recientes') }}'
                         },
                         formatJson(value) {
                             if (!value) return 'Sin datos';
@@ -532,6 +532,14 @@
                                    this.filters.tipoPersona || this.filters.estadoPago ||
                                    this.filters.importeMin || this.filters.importeMax ||
                                    this.filters.orden;
+                        },
+                        getCounterText() {
+                            const hasFilters = this.hasActiveFilters() || '{{ request('search') }}';
+                            if (hasFilters) {
+                                return `Mostrando ${this.filteredRows} de ${this.totalRows} registros`;
+                            } else {
+                                return `Mostrando ${this.totalRows} de ${this.totalRows} registros`;
+                            }
                         },
                         initScrollSync() {
                             this.$nextTick(() => {
@@ -637,8 +645,8 @@
                                             <div class="form-group">
                                                 <label class="form-label">Ordenar por</label>
                                                 <select x-model="filters.orden" class="form-select">
-                                                    <option value="">Por ID (del 1 al último)</option>
                                                     <option value="recientes">Las más recientes</option>
+                                                    <option value="antiguas">Las más antiguas</option>
                                                 </select>
                                             </div>
                                             
@@ -692,7 +700,7 @@
                                 </button>
                                 
                                 <div class="counter-text">
-                                    <span>Mostrando {{ $lineas->count() }} registros de {{ $totalLineas }} líneas de captura generadas</span>
+                                    <span x-text="getCounterText()"></span>
                                 </div>
                             </div>
 

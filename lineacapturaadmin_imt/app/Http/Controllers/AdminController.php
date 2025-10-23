@@ -323,12 +323,21 @@ class AdminController extends Controller
             });
         }
 
-        // Ordenar por fecha_solicitud (más reciente primero) y luego por ID
-        $lineas = $query->orderBy('fecha_solicitud', 'desc')
-                       ->orderBy('id', 'asc')
-                       ->get();
+        // Obtener el total de líneas antes de aplicar filtros
+        $totalLineas = LineaCapturada::count();
 
-        return view('lineas-captura', compact('lineas'));
+        // Aplicar ordenamiento según el parámetro
+        $orden = $request->get('orden', 'recientes');
+        if ($orden === 'antiguas') {
+            $lineas = $query->orderBy('id', 'asc')->get();
+        } else {
+            // Por defecto: más recientes (por fecha_solicitud desc y luego por ID desc)
+            $lineas = $query->orderBy('fecha_solicitud', 'desc')
+                           ->orderBy('id', 'desc')
+                           ->get();
+        }
+
+        return view('lineas-captura', compact('lineas', 'totalLineas'));
     }
 
     /**
