@@ -21,7 +21,7 @@
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-© {{ date('Y') }} {{ config('app.name') }}. {{ __('Todos los derechos reservados.') }}
+{{ config('app.name') }}. {{ __('Desarrollado por la División de Telemática.') }}
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>

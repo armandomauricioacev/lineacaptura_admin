@@ -233,6 +233,8 @@
             border-radius: 8px;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
             width: 380px;
+            max-height: 500px;
+            overflow-y: auto;
             z-index: 50;
         }
         
