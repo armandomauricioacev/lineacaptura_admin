@@ -551,6 +551,20 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
                 <div class="p-6 text-gray-900 table-container" id="tableContainer">
+                    <!-- Alpine.js: funciones clave
+                         - formatJson(value): Formatea texto/objeto como JSON legible.
+                         - applyFilters(): Construye querystring y navega con filtros.
+                         - clearFilters(): Limpia filtros y recarga vista base.
+                         - openModal(type, data): Abre modal dinámico según tipo y datos.
+                         - closeModal(type): Cierra modal y limpia selección.
+                         - openDelete(id, solicitud): Prepara y abre modal de eliminación individual.
+                         - hasActiveFilters(): Determina si hay filtros aplicados.
+                         - getDeleteButtonText(): Texto del botón según filtros.
+                         - openDeleteAction(): Decide abrir modal de borrado total o filtrado.
+                         - getCounterText(): Texto de contador visible/total acorde a filtros.
+                         - getFilteredCount(): Devuelve cantidad filtrada.
+                         - initScrollSync(): Sincroniza scroll de barras superior e inferior.
+                    -->
                     <div x-data="{
                         openGenerado: false,
                         openRecibido: false,
@@ -1086,7 +1100,7 @@
                                  style="display: none;">
                                 <div @click.stop class="modal-content" style="max-width: 600px;">
                                     <div class="modal-header">
-                                        <h3 style="color: #991b1b;">⚠️ Eliminar TODAS las Líneas de Captura</h3>
+                                        <h3 style="color: #991b1b;">Eliminar TODAS las Líneas de Captura</h3>
                                         <button @click="openDeleteAllModal = false" class="btn-close">
                                             <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -1127,7 +1141,7 @@
                                         </div>
 
                                         <p style="font-size: 15px; color: #991b1b; font-weight: 700; margin-top: 20px; text-align: center; background: #fee2e2; padding: 12px; border-radius: 6px; border: 2px solid #ef4444;">
-                                            ⚠️ ESTA ACCIÓN ES IRREVERSIBLE ⚠️
+                                            ESTA ACCIÓN ES IRREVERSIBLE
                                         </p>
                                     </div>
                                     <div class="modal-footer">
@@ -1164,41 +1178,41 @@
                                         </p>
                                         
                                         <div class="filter-summary">
-                                            <p class="filter-summary-title">📋 Filtros aplicados:</p>
+                                            <p class="filter-summary-title">Filtros aplicados:</p>
                                             <div class="filter-summary-content">
                                                 <p x-show="searchValue" style="margin-bottom: 6px;">
-                                                    <strong>🔍 Búsqueda:</strong> <span x-text="searchValue"></span>
+                                                    <strong>Búsqueda:</strong> <span x-text="searchValue"></span>
                                                 </p>
                                                 <p x-show="filters.orden && filters.orden !== 'recientes'" style="margin-bottom: 6px;">
-                                                    <strong>📊 Orden:</strong> <span x-text="filters.orden === 'antiguas' ? 'Las más antiguas' : filters.orden"></span>
+                                                    <strong>Orden:</strong> <span x-text="filters.orden === 'antiguas' ? 'Las más antiguas' : filters.orden"></span>
                                                 </p>
                                                 <p x-show="filters.tipoPersona" style="margin-bottom: 6px;">
-                                                    <strong>👤 Tipo persona:</strong> <span x-text="filters.tipoPersona === 'F' ? 'Física (F)' : 'Moral (M)'"></span>
+                                                    <strong>Tipo persona:</strong> <span x-text="filters.tipoPersona === 'F' ? 'Física (F)' : 'Moral (M)'"></span>
                                                 </p>
                                                 <p x-show="filters.estadoPago" style="margin-bottom: 6px;">
-                                                    <strong>💳 Estado pago:</strong> <span x-text="filters.estadoPago"></span>
+                                                    <strong>Estado pago:</strong> <span x-text="filters.estadoPago"></span>
                                                 </p>
                                                 <p x-show="filters.importeMin || filters.importeMax" style="margin-bottom: 6px;">
-                                                    <strong>💰 Rango importe:</strong> 
+                                                    <strong>Rango importe:</strong> 
                                                     $<span x-text="filters.importeMin || '0'"></span> - $<span x-text="filters.importeMax || '∞'"></span>
                                                 </p>
                                                 <p x-show="filters.fechaDesde" style="margin-bottom: 6px;">
-                                                    <strong>📅 Fecha desde:</strong> <span x-text="filters.fechaDesde"></span>
+                                                    <strong>Fecha desde:</strong> <span x-text="filters.fechaDesde"></span>
                                                 </p>
                                                 <p x-show="filters.fechaHasta" style="margin-bottom: 6px;">
-                                                    <strong>📅 Fecha hasta:</strong> <span x-text="filters.fechaHasta"></span>
+                                                    <strong>Fecha hasta:</strong> <span x-text="filters.fechaHasta"></span>
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div class="count-highlight">
-                                            <strong>🗑️ Registros que serán eliminados:</strong> 
+                                            <strong>Registros que serán eliminados:</strong> 
                                             <span style="color: #dc2626; font-size: 16px;" x-text="filteredRows"></span> 
                                             de <span x-text="totalRows"></span>
                                         </div>
 
                                         <p style="font-size: 14px; color: #dc2626; font-weight: 600; margin-top: 16px; padding: 10px; background: #fee2e2; border-radius: 6px; border-left: 4px solid #ef4444;">
-                                            ⚠️ Esta acción no se puede deshacer y eliminará múltiples registros.
+                                            Esta acción no se puede deshacer y eliminará múltiples registros.
                                         </p>
                                     </div>
                                     <div class="modal-footer">

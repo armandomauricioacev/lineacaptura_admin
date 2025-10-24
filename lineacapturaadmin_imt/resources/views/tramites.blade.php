@@ -225,6 +225,15 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
                 <div class="p-6 text-gray-900 table-container" id="tableContainer">
+                    <!-- Alpine.js: funciones clave (Trámites)
+                         - normalize(text): Normaliza texto para búsqueda (minúsculas y sin acentos).
+                         - filterRows(): Filtra filas por término y actualiza contador visible.
+                         - openEditModal(id): Carga datos vía AJAX y abre modal de edición.
+                         - openDeleteModal(id, descripcion): Prepara datos y abre modal de eliminación.
+                         - validateCreateForm(): Valida campos requeridos del formulario de creación.
+                         - Estado: controla showCreateModal, showEditModal, showDeleteModal, showDeleteAllModal, showExcelModal.
+                         - Scroll: sincroniza barras superior e inferior usando refs (top/bottom scroll).
+                    -->
                     <div x-data="{
                         searchQuery: '',
                         totalRows: {{ $tramites->count() }},
@@ -366,11 +375,11 @@
                             </button>
                             
                             <button @click="showExcelModal = true" class="btn-secondary" style="background: #059669; color: white;">
-                                📊 Cargar Excel
+                                Cargar Excel
                             </button>
                             
                             <button @click="showDeleteAllModal = true" class="btn-secondary" style="background: #dc2626; color: white;">
-                                🗑️ Eliminar Todos
+                                Eliminar Todos
                             </button>
                             
                             <div class="search-container">
@@ -779,7 +788,7 @@
                                         <p class="text-gray-700 mb-4">Seleccione un archivo Excel (.xlsx) con los datos de los trámites.</p>
                                         <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                                             <p class="text-sm text-yellow-800">
-                                                <strong>⚠️ Advertencia:</strong> Al cargar el archivo Excel, todos los trámites existentes serán eliminados y reemplazados por los nuevos datos.
+                                                <strong>Advertencia:</strong> Al cargar el archivo Excel, todos los trámites existentes serán eliminados y reemplazados por los nuevos datos.
                                             </p>
                                         </div>
                                     </div>
@@ -799,14 +808,14 @@
                         <div x-show="showDeleteAllModal" x-cloak class="modal-overlay" @click.self="showDeleteAllModal = false">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h3>⚠️ Confirmar Eliminación Total</h3>
+                                    <h3>Confirmar Eliminación Total</h3>
                                 </div>
                                 <form method="POST" action="{{ route('tramites.destroy-all') }}" class="modal-body">
                                     @csrf
                                     @method('DELETE')
                                     <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
                                         <p class="text-red-800 font-semibold mb-2">
-                                            <strong>🚨 ADVERTENCIA CRÍTICA:</strong>
+                                            <strong>ADVERTENCIA CRÍTICA:</strong>
                                         </p>
                                         <p class="text-red-700 mb-2">
                                             Esta acción eliminará <strong>TODOS</strong> los trámites de la base de datos de forma <strong>PERMANENTE</strong>.
@@ -837,7 +846,7 @@
                                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
                                         <button type="button" @click="showDeleteAllModal = false" class="btn-secondary">Cancelar</button>
                                         <button type="submit" id="confirmDeleteAll" disabled class="btn-delete" style="opacity: 0.5;">
-                                            🗑️ Eliminar Todos los Trámites
+                                            Eliminar Todos los Trámites
                                         </button>
                                     </div>
                                 </form>
