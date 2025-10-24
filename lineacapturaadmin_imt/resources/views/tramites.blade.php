@@ -232,6 +232,8 @@
                         showCreateModal: false,
                         showEditModal: false,
                         showDeleteModal: false,
+                        showDeleteAllModal: false,
+                        showExcelModal: false,
                         editData: {},
                         deleteData: {},
                         createError: false,
@@ -361,6 +363,14 @@
                         <div class="controls-container">
                             <button @click="showCreateModal = true" class="btn-primary">
                                 + Agregar Trámite
+                            </button>
+                            
+                            <button @click="showExcelModal = true" class="btn-secondary" style="background: #059669; color: white;">
+                                📊 Cargar Excel
+                            </button>
+                            
+                            <button @click="showDeleteAllModal = true" class="btn-secondary" style="background: #dc2626; color: white;">
+                                🗑️ Eliminar Todos
                             </button>
                             
                             <div class="search-container">
@@ -756,7 +766,83 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Modal de carga de Excel -->
+                        <div x-show="showExcelModal" x-cloak class="modal-overlay" @click.self="showExcelModal = false">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="text-lg font-semibold">Cargar Trámites desde Excel</h3>
+                                </div>
+                                <form method="POST" action="{{ route('excel.upload-tramites') }}" enctype="multipart/form-data" class="modal-body">
+                                    @csrf
+                                    <div class="mb-4">
+                                        <p class="text-gray-700 mb-4">Seleccione un archivo Excel (.xlsx) con los datos de los trámites.</p>
+                                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                                            <p class="text-sm text-yellow-800">
+                                                <strong>⚠️ Advertencia:</strong> Al cargar el archivo Excel, todos los trámites existentes serán eliminados y reemplazados por los nuevos datos.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="excel_file" class="form-label">Archivo Excel *</label>
+                                        <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls" required class="form-input">
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                                        <button type="button" @click="showExcelModal = false" class="btn-secondary">Cancelar</button>
+                                        <button type="submit" class="btn-primary" style="background: #059669;">Cargar Excel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
  
+                        <!-- Modal para eliminar TODOS los trámites -->
+                        <div x-show="showDeleteAllModal" x-cloak class="modal-overlay" @click.self="showDeleteAllModal = false">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3>⚠️ Confirmar Eliminación Total</h3>
+                                </div>
+                                <form method="POST" action="{{ route('tramites.destroy-all') }}" class="modal-body">
+                                    @csrf
+                                    @method('DELETE')
+                                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                                        <p class="text-red-800 font-semibold mb-2">
+                                            <strong>🚨 ADVERTENCIA CRÍTICA:</strong>
+                                        </p>
+                                        <p class="text-red-700 mb-2">
+                                            Esta acción eliminará <strong>TODOS</strong> los trámites de la base de datos de forma <strong>PERMANENTE</strong>.
+                                        </p>
+                                        <p class="text-red-700 mb-2">
+                                            • Se eliminarán <strong>{{ $tramites->total() }}</strong> trámites en total
+                                        </p>
+                                        <p class="text-red-700 mb-2">
+                                            • Los IDs se reiniciarán desde 1
+                                        </p>
+                                        <p class="text-red-700 font-semibold">
+                                            • Esta acción <strong>NO SE PUEDE DESHACER</strong>
+                                        </p>
+                                    </div>
+                                    <p class="text-gray-700 mb-4">
+                                        Si está seguro de que desea continuar, escriba <strong>"ELIMINAR TODO"</strong> en el campo de abajo:
+                                    </p>
+                                    <div class="form-group">
+                                        <input 
+                                            type="text" 
+                                            id="confirmText" 
+                                            placeholder="Escriba: ELIMINAR TODO" 
+                                            class="form-input"
+                                            required
+                                            oninput="document.getElementById('confirmDeleteAll').disabled = this.value !== 'ELIMINAR TODO'"
+                                        />
+                                    </div>
+                                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                                        <button type="button" @click="showDeleteAllModal = false" class="btn-secondary">Cancelar</button>
+                                        <button type="submit" id="confirmDeleteAll" disabled class="btn-delete" style="opacity: 0.5;">
+                                            🗑️ Eliminar Todos los Trámites
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -773,6 +859,24 @@
                     container.classList.add('loaded');
                 }
             }, 100);
+            
+            // Mejorar la funcionalidad del botón de confirmación
+            const confirmInput = document.getElementById('confirmText');
+            const confirmButton = document.getElementById('confirmDeleteAll');
+            
+            if (confirmInput && confirmButton) {
+                confirmInput.addEventListener('input', function() {
+                    if (this.value === 'ELIMINAR TODO') {
+                        confirmButton.disabled = false;
+                        confirmButton.style.opacity = '1';
+                        confirmButton.style.cursor = 'pointer';
+                    } else {
+                        confirmButton.disabled = true;
+                        confirmButton.style.opacity = '0.5';
+                        confirmButton.style.cursor = 'not-allowed';
+                    }
+                });
+            }
         });
     </script>
  </x-app-layout>

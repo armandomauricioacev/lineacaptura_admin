@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ExcelController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -40,6 +41,14 @@ Route::put('/tramites/{tramite}', [AdminController::class, 'tramitesUpdate'])
 
 Route::delete('/tramites/{tramite}', [AdminController::class, 'tramitesDestroy'])
     ->middleware(['auth', 'verified'])->name('tramites.destroy');
+
+// Ruta para eliminar TODOS los trámites
+Route::delete('/tramites-all', [AdminController::class, 'tramitesDestroyAll'])
+    ->middleware(['auth', 'verified'])->name('tramites.destroy-all');
+
+// ========== RUTAS DE EXCEL ==========
+Route::post('/excel/upload-tramites', [ExcelController::class, 'uploadTramites'])
+    ->middleware(['auth', 'verified'])->name('excel.upload-tramites');
 
 // ========== RUTAS DE LÍNEAS DE CAPTURA ==========
 Route::get('/lineas-captura', [AdminController::class, 'lineasCapturadasIndex'])

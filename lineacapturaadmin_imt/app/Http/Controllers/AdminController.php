@@ -7,6 +7,7 @@ use App\Models\Tramite;
 use App\Models\LineaCapturada;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -408,4 +409,30 @@ public function lineasCapturaDeleteFiltered(Request $request)
 
     return redirect()->route('lineas-captura')->with('error', 'Debe aplicar al menos un filtro para eliminar registros.');
 }
+
+    /**
+     * Eliminar TODOS los trámites y reiniciar el auto_increment.
+     */
+    public function tramitesDestroyAll()
+    {
+        try {
+            DB::transaction(function () {
+                // Desactivar restricciones de clave foránea temporalmente
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                
+                // Eliminar todos los trámites
+                Tramite::query()->delete();
+                
+                // Reiniciar el auto_increment a 1
+                DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1;');
+                
+                // Reactivar restricciones de clave foránea
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            });
+
+            return redirect()->route('tramites')->with('success', 'Todos los trámites han sido eliminados correctamente y los IDs se han reiniciado.');
+        } catch (\Exception $e) {
+            return redirect()->route('tramites')->with('error', 'Error al eliminar los trámites: ' . $e->getMessage());
+        }
+    }
 }
