@@ -83,7 +83,7 @@
             background: #dc2626;
         }
         
-        .btn-delete-filtered {
+        .btn-delete-action {
             background: #ef4444;
             color: white;
             padding: 8px 16px;
@@ -98,7 +98,7 @@
             gap: 8px;
         }
         
-        .btn-delete-filtered:hover {
+        .btn-delete-action:hover {
             background: #dc2626;
             transform: translateY(-1px);
             box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
@@ -451,6 +451,100 @@
             background: #fee2e2;
             color: #991b1b;
         }
+
+        .warning-box {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .warning-box-danger {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .warning-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-title-danger {
+            font-size: 16px;
+            font-weight: 700;
+            color: #991b1b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .warning-text {
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .warning-text-danger {
+            color: #7f1d1d;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+
+        .warning-list {
+            margin-top: 12px;
+            padding-left: 20px;
+        }
+
+        .warning-list li {
+            color: #78350f;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .filter-summary {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .filter-summary-title {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .filter-summary-content {
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .filter-summary-content p {
+            margin-bottom: 4px;
+        }
+
+        .count-highlight {
+            font-size: 14px;
+            color: #374151;
+            margin-top: 12px;
+            font-weight: 600;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
     </style>
 
     <div class="py-12">
@@ -463,6 +557,7 @@
                         openHtml: false,
                         openErrores: false,
                         openDeleteModal: false,
+                        openDeleteAllModal: false,
                         openDeleteFilteredModal: false,
                         selectedGenerado: null,
                         selectedRecibido: null,
@@ -482,6 +577,7 @@
                             fechaHasta: '{{ request('fecha_hasta', '') }}',
                             orden: '{{ request('orden', 'recientes') }}'
                         },
+                        searchValue: '{{ request('search', '') }}',
                         formatJson(value) {
                             if (!value) return 'Sin datos';
                             try {
@@ -500,6 +596,7 @@
                             if (this.filters.fechaDesde) params.append('fecha_desde', this.filters.fechaDesde);
                             if (this.filters.fechaHasta) params.append('fecha_hasta', this.filters.fechaHasta);
                             if (this.filters.orden) params.append('orden', this.filters.orden);
+                            if (this.searchValue) params.append('search', this.searchValue);
                             window.location.href = '/lineas-captura?' + params.toString();
                         },
                         clearFilters() {
@@ -510,8 +607,9 @@
                                 importeMax: '',
                                 fechaDesde: '',
                                 fechaHasta: '',
-                                orden: ''
+                                orden: 'recientes'
                             };
+                            this.searchValue = '';
                             window.location.href = '/lineas-captura';
                         },
                         openModal(type, data) {
@@ -533,15 +631,29 @@
                             return this.filters.fechaDesde || this.filters.fechaHasta || 
                                    this.filters.tipoPersona || this.filters.estadoPago ||
                                    this.filters.importeMin || this.filters.importeMax ||
-                                   this.filters.orden;
+                                   (this.filters.orden && this.filters.orden !== 'recientes') ||
+                                   this.searchValue;
+                        },
+                        getDeleteButtonText() {
+                            return this.hasActiveFilters() ? 'Eliminar filtrados' : 'Eliminar TODO';
+                        },
+                        openDeleteAction() {
+                            if (this.hasActiveFilters()) {
+                                this.openDeleteFilteredModal = true;
+                            } else {
+                                this.openDeleteAllModal = true;
+                            }
                         },
                         getCounterText() {
-                            const hasFilters = this.hasActiveFilters() || '{{ request('search') }}';
+                            const hasFilters = this.hasActiveFilters();
                             if (hasFilters) {
                                 return `Mostrando ${this.filteredRows} de ${this.totalRows} registros`;
                             } else {
                                 return `Mostrando ${this.totalRows} de ${this.totalRows} registros`;
                             }
+                        },
+                        getFilteredCount() {
+                            return this.filteredRows;
                         },
                         initScrollSync() {
                             this.$nextTick(() => {
@@ -620,7 +732,7 @@
                                         <input 
                                             type="text" 
                                             name="search"
-                                            value="{{ request('search') }}"
+                                            x-model="searchValue"
                                             placeholder="Buscar líneas de captura..." 
                                             class="search-input"
                                         />
@@ -694,11 +806,11 @@
                                     </div>
                                 </div>
                                 
-                                <button x-show="hasActiveFilters()" @click="openDeleteFilteredModal = true" class="btn-delete-filtered">
+                                <button @click="openDeleteAction()" class="btn-delete-action">
                                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
-                                    Eliminar filtrados
+                                    <span x-text="getDeleteButtonText()"></span>
                                 </button>
                                 
                                 <div class="counter-text">
@@ -711,7 +823,8 @@
                             </div>
 
                             <div class="table-wrapper" x-ref="tableWrapper">
-                                <table class="custom-table" x-ref="customTable">
+                                <table class="custom-table"
+                                x-ref="customTable">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -965,13 +1078,78 @@
                                 </div>
                             </div>
 
+                            <!-- Modal Eliminar TODO -->
+                            <div x-show="openDeleteAllModal" 
+                                 x-cloak
+                                 @click="openDeleteAllModal = false"
+                                 class="modal-overlay"
+                                 style="display: none;">
+                                <div @click.stop class="modal-content" style="max-width: 600px;">
+                                    <div class="modal-header">
+                                        <h3 style="color: #991b1b;">⚠️ Eliminar TODAS las Líneas de Captura</h3>
+                                        <button @click="openDeleteAllModal = false" class="btn-close">
+                                            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="warning-box-danger">
+                                            <div class="warning-title-danger">
+                                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                ADVERTENCIA CRÍTICA
+                                            </div>
+                                            <p class="warning-text-danger">
+                                                Está a punto de eliminar TODAS las líneas de captura de la base de datos.
+                                            </p>
+                                        </div>
+
+                                        <p style="color: #374151; margin-bottom: 16px; font-size: 15px; line-height: 1.6;">
+                                            Esta acción eliminará <strong style="color: #991b1b; font-size: 18px;" x-text="totalRows"></strong> líneas de captura de forma permanente.
+                                        </p>
+
+                                        <div class="warning-box">
+                                            <div class="warning-title">
+                                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                Consecuencias de esta acción:
+                                            </div>
+                                            <ul class="warning-list">
+                                                <li>✗ Se eliminarán <strong>TODOS</strong> los registros de líneas de captura</li>
+                                                <li>✗ Los datos NO se podrán recuperar</li>
+                                                <li>✗ Se perderá todo el historial de pagos y solicitudes</li>
+                                                <li>✓ El contador de ID se reiniciará a 1</li>
+                                                <li>✓ La base de datos quedará completamente limpia</li>
+                                            </ul>
+                                        </div>
+
+                                        <p style="font-size: 15px; color: #991b1b; font-weight: 700; margin-top: 20px; text-align: center; background: #fee2e2; padding: 12px; border-radius: 6px; border: 2px solid #ef4444;">
+                                            ⚠️ ESTA ACCIÓN ES IRREVERSIBLE ⚠️
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button @click="openDeleteAllModal = false" class="btn-secondary">Cancelar</button>
+                                        <form action="{{ route('lineas-captura.delete-all') }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-delete" style="background: #7f1d1d; font-weight: 700;">
+                                                Sí, eliminar TODO
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Modal Eliminar por Filtros -->
                             <div x-show="openDeleteFilteredModal" 
                                  x-cloak
                                  @click="openDeleteFilteredModal = false"
                                  class="modal-overlay"
                                  style="display: none;">
-                                <div @click.stop class="modal-content" style="max-width: 550px;">
+                                <div @click.stop class="modal-content" style="max-width: 600px;">
                                     <div class="modal-header">
                                         <h3>Eliminar Registros Filtrados</h3>
                                         <button @click="openDeleteFilteredModal = false" class="btn-close">
@@ -981,22 +1159,47 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <p style="color: #374151; margin-bottom: 16px;">¿Está seguro de que desea eliminar todas las líneas de captura que coinciden con los filtros aplicados?</p>
-                                        <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                                            <p style="font-size: 14px; color: #6b7280; margin-bottom: 8px;"><strong>Filtros aplicados:</strong></p>
-                                            <div style="font-size: 13px; color: #374151;">
-                                                <p x-show="filters.orden" style="margin-bottom: 4px;">• <strong>Orden:</strong> <span x-text="filters.orden === 'recientes' ? 'Las más recientes' : 'Por ID (del 1 al último)'"></span></p>
-                                                <p x-show="filters.tipoPersona" style="margin-bottom: 4px;">• <strong>Tipo persona:</strong> <span x-text="filters.tipoPersona === 'F' ? 'Física' : 'Moral'"></span></p>
-                                                <p x-show="filters.estadoPago" style="margin-bottom: 4px;">• <strong>Estado pago:</strong> <span x-text="filters.estadoPago"></span></p>
-                                                <p x-show="filters.importeMin || filters.importeMax" style="margin-bottom: 4px;">• <strong>Rango importe:</strong> $<span x-text="filters.importeMin || '0'"></span> - $<span x-text="filters.importeMax || '∞'"></span></p>
-                                                <p x-show="filters.fechaDesde" style="margin-bottom: 4px;">• <strong>Fecha desde:</strong> <span x-text="filters.fechaDesde"></span></p>
-                                                <p x-show="filters.fechaHasta" style="margin-bottom: 4px;">• <strong>Fecha hasta:</strong> <span x-text="filters.fechaHasta"></span></p>
+                                        <p style="color: #374151; margin-bottom: 16px; font-size: 15px;">
+                                            ¿Está seguro de que desea eliminar todas las líneas de captura que coinciden con los filtros aplicados?
+                                        </p>
+                                        
+                                        <div class="filter-summary">
+                                            <p class="filter-summary-title">📋 Filtros aplicados:</p>
+                                            <div class="filter-summary-content">
+                                                <p x-show="searchValue" style="margin-bottom: 6px;">
+                                                    <strong>🔍 Búsqueda:</strong> <span x-text="searchValue"></span>
+                                                </p>
+                                                <p x-show="filters.orden && filters.orden !== 'recientes'" style="margin-bottom: 6px;">
+                                                    <strong>📊 Orden:</strong> <span x-text="filters.orden === 'antiguas' ? 'Las más antiguas' : filters.orden"></span>
+                                                </p>
+                                                <p x-show="filters.tipoPersona" style="margin-bottom: 6px;">
+                                                    <strong>👤 Tipo persona:</strong> <span x-text="filters.tipoPersona === 'F' ? 'Física (F)' : 'Moral (M)'"></span>
+                                                </p>
+                                                <p x-show="filters.estadoPago" style="margin-bottom: 6px;">
+                                                    <strong>💳 Estado pago:</strong> <span x-text="filters.estadoPago"></span>
+                                                </p>
+                                                <p x-show="filters.importeMin || filters.importeMax" style="margin-bottom: 6px;">
+                                                    <strong>💰 Rango importe:</strong> 
+                                                    $<span x-text="filters.importeMin || '0'"></span> - $<span x-text="filters.importeMax || '∞'"></span>
+                                                </p>
+                                                <p x-show="filters.fechaDesde" style="margin-bottom: 6px;">
+                                                    <strong>📅 Fecha desde:</strong> <span x-text="filters.fechaDesde"></span>
+                                                </p>
+                                                <p x-show="filters.fechaHasta" style="margin-bottom: 6px;">
+                                                    <strong>📅 Fecha hasta:</strong> <span x-text="filters.fechaHasta"></span>
+                                                </p>
                                             </div>
-                                            <p style="font-size: 14px; color: #374151; margin-top: 12px; font-weight: 600;">
-                                                <strong>Registros a eliminar:</strong> {{ $lineas->count() }} de {{ $totalLineas }}
-                                            </p>
                                         </div>
-                                        <p style="font-size: 14px; color: #dc2626; font-weight: 600;">⚠️ Esta acción no se puede deshacer y eliminará múltiples registros.</p>
+
+                                        <div class="count-highlight">
+                                            <strong>🗑️ Registros que serán eliminados:</strong> 
+                                            <span style="color: #dc2626; font-size: 16px;" x-text="filteredRows"></span> 
+                                            de <span x-text="totalRows"></span>
+                                        </div>
+
+                                        <p style="font-size: 14px; color: #dc2626; font-weight: 600; margin-top: 16px; padding: 10px; background: #fee2e2; border-radius: 6px; border-left: 4px solid #ef4444;">
+                                            ⚠️ Esta acción no se puede deshacer y eliminará múltiples registros.
+                                        </p>
                                     </div>
                                     <div class="modal-footer">
                                         <button @click="openDeleteFilteredModal = false" class="btn-secondary">Cancelar</button>
@@ -1009,7 +1212,8 @@
                                             <input type="hidden" name="importe_max" :value="filters.importeMax">
                                             <input type="hidden" name="fecha_desde" :value="filters.fechaDesde">
                                             <input type="hidden" name="fecha_hasta" :value="filters.fechaHasta">
-                                            <button type="submit" class="btn-delete">Eliminar Seleccionados</button>
+                                            <input type="hidden" name="search" :value="searchValue">
+                                            <button type="submit" class="btn-delete">Eliminar Filtrados</button>
                                         </form>
                                     </div>
                                 </div>

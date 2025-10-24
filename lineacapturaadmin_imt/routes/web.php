@@ -54,10 +54,16 @@ Route::post('/excel/upload-tramites', [ExcelController::class, 'uploadTramites']
 Route::get('/lineas-captura', [AdminController::class, 'lineasCapturadasIndex'])
     ->middleware(['auth', 'verified'])->name('lineas-captura');
 
-// IMPORTANTE: Esta ruta debe ir ANTES de la ruta con {linea}
+// IMPORTANTE: Estas rutas deben ir ANTES de la ruta con {linea}
+// Ruta para eliminar líneas filtradas
 Route::delete('/lineas-captura/delete-filtered', [AdminController::class, 'lineasCapturaDeleteFiltered'])
     ->middleware(['auth', 'verified'])->name('lineas-captura.delete-filtered');
 
+// Ruta para eliminar TODAS las líneas de captura y reiniciar ID
+Route::delete('/lineas-captura/delete-all', [AdminController::class, 'lineasCapturaDeleteAll'])
+    ->middleware(['auth', 'verified'])->name('lineas-captura.delete-all');
+
+// Ruta para eliminar línea individual
 Route::delete('/lineas-captura/{linea}', [AdminController::class, 'lineaCapturaDestroy'])
     ->middleware(['auth', 'verified'])->name('lineas-captura.destroy');
 

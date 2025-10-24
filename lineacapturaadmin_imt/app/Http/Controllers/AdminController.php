@@ -352,63 +352,111 @@ class AdminController extends Controller
     }
 
     /**
- * Elimina líneas de captura por filtros múltiples.
- */
-public function lineasCapturaDeleteFiltered(Request $request)
-{
-    $validated = $request->validate([
-        'tipo_persona' => ['nullable', 'in:F,M'],
-        'estado_pago' => ['nullable', 'string'],
-        'importe_min' => ['nullable', 'numeric'],
-        'importe_max' => ['nullable', 'numeric'],
-        'fecha_desde' => ['nullable', 'date'],
-        'fecha_hasta' => ['nullable', 'date'],
-    ]);
+     * Elimina líneas de captura por filtros múltiples.
+     * Solo se ejecuta cuando hay filtros activos.
+     */
+    public function lineasCapturaDeleteFiltered(Request $request)
+    {
+        $validated = $request->validate([
+            'tipo_persona' => ['nullable', 'in:F,M'],
+            'estado_pago' => ['nullable', 'string'],
+            'importe_min' => ['nullable', 'numeric'],
+            'importe_max' => ['nullable', 'numeric'],
+            'fecha_desde' => ['nullable', 'date'],
+            'fecha_hasta' => ['nullable', 'date'],
+            'search' => ['nullable', 'string'],
+        ]);
 
-    $query = LineaCapturada::query();
-    $hasFilters = false;
+        $query = LineaCapturada::query();
+        $hasFilters = false;
 
-    // Filtro tipo persona
-    if (!empty($validated['tipo_persona'])) {
-        $query->where('tipo_persona', $validated['tipo_persona']);
-        $hasFilters = true;
+        // Filtro tipo persona
+        if (!empty($validated['tipo_persona'])) {
+            $query->where('tipo_persona', $validated['tipo_persona']);
+            $hasFilters = true;
+        }
+
+        // Filtro estado pago
+        if (!empty($validated['estado_pago'])) {
+            $query->where('estado_pago', $validated['estado_pago']);
+            $hasFilters = true;
+        }
+
+        // Filtro rango de importe
+        if (!empty($validated['importe_min'])) {
+            $query->where('importe_total', '>=', $validated['importe_min']);
+            $hasFilters = true;
+        }
+        if (!empty($validated['importe_max'])) {
+            $query->where('importe_total', '<=', $validated['importe_max']);
+            $hasFilters = true;
+        }
+
+        // Filtro de fechas de vigencia
+        if (!empty($validated['fecha_desde'])) {
+            $query->whereDate('fecha_vigencia', '>=', $validated['fecha_desde']);
+            $hasFilters = true;
+        }
+        if (!empty($validated['fecha_hasta'])) {
+            $query->whereDate('fecha_vigencia', '<=', $validated['fecha_hasta']);
+            $hasFilters = true;
+        }
+
+        // Filtro de búsqueda
+        if (!empty($validated['search'])) {
+            $search = $validated['search'];
+            $query->where(function($q) use ($search) {
+                $q->where('solicitud', 'like', "%{$search}%")
+                  ->orWhere('rfc', 'like', "%{$search}%")
+                  ->orWhere('curp', 'like', "%{$search}%")
+                  ->orWhere('nombres', 'like', "%{$search}%")
+                  ->orWhere('apellido_paterno', 'like', "%{$search}%")
+                  ->orWhere('apellido_materno', 'like', "%{$search}%")
+                  ->orWhere('razon_social', 'like', "%{$search}%");
+            });
+            $hasFilters = true;
+        }
+
+        // Solo eliminar si hay filtros activos
+        if ($hasFilters) {
+            $count = $query->count();
+            $query->delete();
+
+            return redirect()->route('lineas-captura')->with('success', "Se eliminaron {$count} líneas de captura filtradas correctamente.");
+        }
+
+        return redirect()->route('lineas-captura')->with('error', 'Debe aplicar al menos un filtro para eliminar registros filtrados.');
     }
 
-    // Filtro estado pago
-    if (!empty($validated['estado_pago'])) {
-        $query->where('estado_pago', $validated['estado_pago']);
-        $hasFilters = true;
-    }
+    /**
+     * Elimina TODAS las líneas de captura de la base de datos y reinicia el auto_increment a 1.
+     * Esta función se ejecuta solo cuando NO hay filtros activos.
+     */
+    public function lineasCapturaDeleteAll()
+    {
+        try {
+            // Obtener el total de registros antes de eliminar
+            $totalRegistros = LineaCapturada::count();
 
-    // Filtro rango de importe
-    if (!empty($validated['importe_min'])) {
-        $query->where('importe_total', '>=', $validated['importe_min']);
-        $hasFilters = true;
-    }
-    if (!empty($validated['importe_max'])) {
-        $query->where('importe_total', '<=', $validated['importe_max']);
-        $hasFilters = true;
-    }
+            // Desactivar restricciones de clave foránea temporalmente
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            
+            // Eliminar todas las líneas de captura
+            LineaCapturada::query()->delete();
+            
+            // Reiniciar el auto_increment a 1
+            DB::statement('ALTER TABLE lineas_capturadas AUTO_INCREMENT = 1');
+            
+            // Reactivar restricciones de clave foránea
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-    // Cambio: Ahora usa fecha_vigencia en lugar de fecha_solicitud
-    if (!empty($validated['fecha_desde'])) {
-        $query->whereDate('fecha_vigencia', '>=', $validated['fecha_desde']);
-        $hasFilters = true;
+            return redirect()->route('lineas-captura')->with('success', "Se eliminaron TODAS las {$totalRegistros} líneas de captura de la base de datos. El contador de ID se reinició a 1.");
+        } catch (\Exception $e) {
+            // En caso de error, asegurar que las restricciones se reactiven
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            return redirect()->route('lineas-captura')->with('error', 'Error al eliminar todas las líneas de captura: ' . $e->getMessage());
+        }
     }
-    if (!empty($validated['fecha_hasta'])) {
-        $query->whereDate('fecha_vigencia', '<=', $validated['fecha_hasta']);
-        $hasFilters = true;
-    }
-
-    if ($hasFilters) {
-        $count = $query->count();
-        $query->delete();
-
-        return redirect()->route('lineas-captura')->with('success', "Se eliminaron {$count} líneas de captura correctamente.");
-    }
-
-    return redirect()->route('lineas-captura')->with('error', 'Debe aplicar al menos un filtro para eliminar registros.');
-}
 
     /**
      * Eliminar TODOS los trámites y reiniciar el auto_increment.
@@ -423,7 +471,7 @@ public function lineasCapturaDeleteFiltered(Request $request)
             Tramite::query()->delete();
             
             // Reiniciar el auto_increment a 1
-            DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1;');
+            DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1');
             
             // Reactivar restricciones de clave foránea
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
