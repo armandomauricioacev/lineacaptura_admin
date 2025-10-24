@@ -501,9 +501,7 @@
                              <div class="table-scroll-inner" x-ref="bottomScrollInner"></div>
                          </div>
                          
-                         <div class="mt-4">
-                            {{ $tramites->links() }}
-                        </div>
+                        {{-- Paginación removida: listado continuo de trámites --}}
 
                         <!-- Modal Crear -->
                         <div x-show="showCreateModal" x-cloak class="modal-overlay" @click.self="showCreateModal = false">
@@ -821,8 +819,8 @@
                                             Esta acción eliminará <strong>TODOS</strong> los trámites de la base de datos de forma <strong>PERMANENTE</strong>.
                                         </p>
                                         <p class="text-red-700 mb-2">
-                                            • Se eliminarán <strong>{{ $tramites->total() }}</strong> trámites en total
-                                        </p>
+                                             • Se eliminarán <strong>{{ $tramites->count() }}</strong> trámites en total
+                                         </p>
                                         <p class="text-red-700 mb-2">
                                             • Los IDs se reiniciarán desde 1
                                         </p>

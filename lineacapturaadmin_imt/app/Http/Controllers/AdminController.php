@@ -110,7 +110,9 @@ class AdminController extends Controller
             'saldo_favor',
             'created_at',
             'updated_at'
-        )->paginate(15);
+        )
+        ->orderBy('id', 'desc')
+        ->get();
 
         return view('tramites', compact('tramites'));
     }
