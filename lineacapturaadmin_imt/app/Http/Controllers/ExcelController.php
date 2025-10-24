@@ -50,6 +50,9 @@ class ExcelController extends Controller
                 }));
             });
 
+            // Reindexar el array después del filtrado para que los índices sean consecutivos
+            $rows = array_values($rows);
+
             // Validar y procesar datos
             $tramitesData = [];
             $errores = [];
@@ -157,7 +160,7 @@ class ExcelController extends Controller
                 }
             });
 
-            return back()->with('success', 'Excel procesado con éxito. Se procesaron ' . count($tramitesData) . ' trámites (nuevos o actualizados).');
+            return back()->with('success', 'Excel procesado con éxito. Se procesaron ' . count($tramitesData) . ' trámites.');
 
         } catch (\Exception $e) {
             Log::error('Error al procesar Excel de trámites: ' . $e->getMessage());

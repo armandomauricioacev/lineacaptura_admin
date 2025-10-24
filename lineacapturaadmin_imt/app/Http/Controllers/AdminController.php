@@ -416,22 +416,22 @@ public function lineasCapturaDeleteFiltered(Request $request)
     public function tramitesDestroyAll()
     {
         try {
-            DB::transaction(function () {
-                // Desactivar restricciones de clave foránea temporalmente
-                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-                
-                // Eliminar todos los trámites
-                Tramite::query()->delete();
-                
-                // Reiniciar el auto_increment a 1
-                DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1;');
-                
-                // Reactivar restricciones de clave foránea
-                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-            });
+            // Desactivar restricciones de clave foránea temporalmente
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            
+            // Eliminar todos los trámites
+            Tramite::query()->delete();
+            
+            // Reiniciar el auto_increment a 1
+            DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1;');
+            
+            // Reactivar restricciones de clave foránea
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-            return redirect()->route('tramites')->with('success', 'Todos los trámites han sido eliminados correctamente y los IDs se han reiniciado.');
+            return redirect()->route('tramites')->with('success', 'Todos los trámites han sido eliminados correctamente.');
         } catch (\Exception $e) {
+            // En caso de error, asegurar que las restricciones se reactiven
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             return redirect()->route('tramites')->with('error', 'Error al eliminar los trámites: ' . $e->getMessage());
         }
     }
