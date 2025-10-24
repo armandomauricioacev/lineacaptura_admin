@@ -42,10 +42,6 @@ Route::put('/tramites/{tramite}', [AdminController::class, 'tramitesUpdate'])
 Route::delete('/tramites/{tramite}', [AdminController::class, 'tramitesDestroy'])
     ->middleware(['auth', 'verified'])->name('tramites.destroy');
 
-// Ruta para eliminar TODOS los trámites
-Route::delete('/tramites-all', [AdminController::class, 'tramitesDestroyAll'])
-    ->middleware(['auth', 'verified'])->name('tramites.destroy-all');
-
 // ========== RUTAS DE EXCEL ==========
 Route::post('/excel/upload-tramites', [ExcelController::class, 'uploadTramites'])
     ->middleware(['auth', 'verified'])->name('excel.upload-tramites');
@@ -54,14 +50,10 @@ Route::post('/excel/upload-tramites', [ExcelController::class, 'uploadTramites']
 Route::get('/lineas-captura', [AdminController::class, 'lineasCapturadasIndex'])
     ->middleware(['auth', 'verified'])->name('lineas-captura');
 
-// IMPORTANTE: Estas rutas deben ir ANTES de la ruta con {linea}
+// IMPORTANTE: Esta ruta debe ir ANTES de la ruta con {linea}
 // Ruta para eliminar líneas filtradas
 Route::delete('/lineas-captura/delete-filtered', [AdminController::class, 'lineasCapturaDeleteFiltered'])
     ->middleware(['auth', 'verified'])->name('lineas-captura.delete-filtered');
-
-// Ruta para eliminar TODAS las líneas de captura y reiniciar ID
-Route::delete('/lineas-captura/delete-all', [AdminController::class, 'lineasCapturaDeleteAll'])
-    ->middleware(['auth', 'verified'])->name('lineas-captura.delete-all');
 
 // Ruta para eliminar línea individual
 Route::delete('/lineas-captura/{linea}', [AdminController::class, 'lineaCapturaDestroy'])

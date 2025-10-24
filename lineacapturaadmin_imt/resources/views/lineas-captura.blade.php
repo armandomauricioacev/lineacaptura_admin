@@ -452,66 +452,6 @@
             color: #991b1b;
         }
 
-        .warning-box {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .warning-box-danger {
-            background: #fee2e2;
-            border: 2px solid #ef4444;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .warning-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #92400e;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .warning-title-danger {
-            font-size: 16px;
-            font-weight: 700;
-            color: #991b1b;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .warning-text {
-            color: #78350f;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .warning-text-danger {
-            color: #7f1d1d;
-            font-size: 14px;
-            line-height: 1.6;
-            font-weight: 600;
-        }
-
-        .warning-list {
-            margin-top: 12px;
-            padding-left: 20px;
-        }
-
-        .warning-list li {
-            color: #78350f;
-            font-size: 13px;
-            margin-bottom: 6px;
-        }
-
         .filter-summary {
             background: #f9fafb;
             padding: 16px;
@@ -551,27 +491,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
                 <div class="p-6 text-gray-900 table-container" id="tableContainer">
-                    <!-- Alpine.js: funciones clave
-                         - formatJson(value): Formatea texto/objeto como JSON legible.
-                         - applyFilters(): Construye querystring y navega con filtros.
-                         - clearFilters(): Limpia filtros y recarga vista base.
-                         - openModal(type, data): Abre modal dinámico según tipo y datos.
-                         - closeModal(type): Cierra modal y limpia selección.
-                         - openDelete(id, solicitud): Prepara y abre modal de eliminación individual.
-                         - hasActiveFilters(): Determina si hay filtros aplicados.
-                         - getDeleteButtonText(): Texto del botón según filtros.
-                         - openDeleteAction(): Decide abrir modal de borrado total o filtrado.
-                         - getCounterText(): Texto de contador visible/total acorde a filtros.
-                         - getFilteredCount(): Devuelve cantidad filtrada.
-                         - initScrollSync(): Sincroniza scroll de barras superior e inferior.
-                    -->
                     <div x-data="{
                         openGenerado: false,
                         openRecibido: false,
                         openHtml: false,
                         openErrores: false,
                         openDeleteModal: false,
-                        openDeleteAllModal: false,
                         openDeleteFilteredModal: false,
                         selectedGenerado: null,
                         selectedRecibido: null,
@@ -649,13 +574,11 @@
                                    this.searchValue;
                         },
                         getDeleteButtonText() {
-                            return this.hasActiveFilters() ? 'Eliminar filtrados' : 'Eliminar TODO';
+                            return 'Eliminar filtrados';
                         },
                         openDeleteAction() {
                             if (this.hasActiveFilters()) {
                                 this.openDeleteFilteredModal = true;
-                            } else {
-                                this.openDeleteAllModal = true;
                             }
                         },
                         getCounterText() {
@@ -820,7 +743,11 @@
                                     </div>
                                 </div>
                                 
-                                <button @click="openDeleteAction()" class="btn-delete-action">
+                                <button 
+                                    @click="openDeleteAction()" 
+                                    class="btn-delete-action"
+                                    x-show="hasActiveFilters()"
+                                    style="display: none;">
                                     <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
@@ -837,8 +764,7 @@
                             </div>
 
                             <div class="table-wrapper" x-ref="tableWrapper">
-                                <table class="custom-table"
-                                x-ref="customTable">
+                                <table class="custom-table" x-ref="customTable">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
@@ -1087,71 +1013,6 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn-delete">Eliminar</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Modal Eliminar TODO -->
-                            <div x-show="openDeleteAllModal" 
-                                 x-cloak
-                                 @click="openDeleteAllModal = false"
-                                 class="modal-overlay"
-                                 style="display: none;">
-                                <div @click.stop class="modal-content" style="max-width: 600px;">
-                                    <div class="modal-header">
-                                        <h3 style="color: #991b1b;">Eliminar TODAS las Líneas de Captura</h3>
-                                        <button @click="openDeleteAllModal = false" class="btn-close">
-                                            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="warning-box-danger">
-                                            <div class="warning-title-danger">
-                                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                ADVERTENCIA CRÍTICA
-                                            </div>
-                                            <p class="warning-text-danger">
-                                                Está a punto de eliminar TODAS las líneas de captura de la base de datos.
-                                            </p>
-                                        </div>
-
-                                        <p style="color: #374151; margin-bottom: 16px; font-size: 15px; line-height: 1.6;">
-                                            Esta acción eliminará <strong style="color: #991b1b; font-size: 18px;" x-text="totalRows"></strong> líneas de captura de forma permanente.
-                                        </p>
-
-                                        <div class="warning-box">
-                                            <div class="warning-title">
-                                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                Consecuencias de esta acción:
-                                            </div>
-                                            <ul class="warning-list">
-                                                <li>✗ Se eliminarán <strong>TODOS</strong> los registros de líneas de captura</li>
-                                                <li>✗ Los datos NO se podrán recuperar</li>
-                                                <li>✗ Se perderá todo el historial de pagos y solicitudes</li>
-                                                <li>✓ El contador de ID se reiniciará a 1</li>
-                                                <li>✓ La base de datos quedará completamente limpia</li>
-                                            </ul>
-                                        </div>
-
-                                        <p style="font-size: 15px; color: #991b1b; font-weight: 700; margin-top: 20px; text-align: center; background: #fee2e2; padding: 12px; border-radius: 6px; border: 2px solid #ef4444;">
-                                            ESTA ACCIÓN ES IRREVERSIBLE
-                                        </p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button @click="openDeleteAllModal = false" class="btn-secondary">Cancelar</button>
-                                        <form action="{{ route('lineas-captura.delete-all') }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-delete" style="background: #7f1d1d; font-weight: 700;">
-                                                Sí, eliminar TODO
-                                            </button>
                                         </form>
                                     </div>
                                 </div>

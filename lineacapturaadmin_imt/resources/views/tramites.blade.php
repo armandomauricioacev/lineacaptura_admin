@@ -16,7 +16,7 @@
         
         .custom-table {
             width: 100%;
-            min-width: 2400px; /* Aumentado para acomodar todas las columnas */
+            min-width: 2400px;
             border-collapse: collapse;
             background: white;
             border-radius: 8px;
@@ -131,13 +131,12 @@
             -webkit-overflow-scrolling: touch;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE/Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             touch-action: pan-x;
             overscroll-behavior-x: contain;
         }
         
-        /* Ocultar scrollbar del contenedor interno (usamos barras externas) */
         .table-wrapper::-webkit-scrollbar {
             display: none;
         }
@@ -156,7 +155,6 @@
             background: #94a3b8;
         }
         
-        /* Scrollbar superior sincronizado */
         .table-scroll-top {
             width: 100%;
             overflow-x: auto;
@@ -180,7 +178,6 @@
             background: #94a3b8;
         }
         
-        /* Scrollbar inferior sincronizado */
         .table-scroll-bottom {
             width: 100%;
             overflow-x: auto;
@@ -203,7 +200,7 @@
         .table-scroll-bottom::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Nuevos estilos para botones, modales y formularios */
+        
         .btn-primary { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
         .btn-primary:hover { background: #2563eb; }
         .btn-secondary { background: #6b7280; color: white; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
@@ -225,15 +222,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
                 <div class="p-6 text-gray-900 table-container" id="tableContainer">
-                    <!-- Alpine.js: funciones clave (Trámites)
-                         - normalize(text): Normaliza texto para búsqueda (minúsculas y sin acentos).
-                         - filterRows(): Filtra filas por término y actualiza contador visible.
-                         - openEditModal(id): Carga datos vía AJAX y abre modal de edición.
-                         - openDeleteModal(id, descripcion): Prepara datos y abre modal de eliminación.
-                         - validateCreateForm(): Valida campos requeridos del formulario de creación.
-                         - Estado: controla showCreateModal, showEditModal, showDeleteModal, showDeleteAllModal, showExcelModal.
-                         - Scroll: sincroniza barras superior e inferior usando refs (top/bottom scroll).
-                    -->
                     <div x-data="{
                         searchQuery: '',
                         totalRows: {{ $tramites->count() }},
@@ -241,7 +229,6 @@
                         showCreateModal: false,
                         showEditModal: false,
                         showDeleteModal: false,
-                        showDeleteAllModal: false,
                         showExcelModal: false,
                         editData: {},
                         deleteData: {},
@@ -343,7 +330,6 @@
                          }
                     }" x-init="filterRows(); initScrollSync()">
                     
-                    <!-- Mensajes de éxito/error -->
                     @if(session('success'))
                         <div class="alert alert-success">
                             {{ session('success') }}
@@ -368,7 +354,6 @@
                     
                     <div class="w-full min-w-0">
                         
-                        <!-- Controles superiores -->
                         <div class="controls-container">
                             <button @click="showCreateModal = true" class="btn-primary">
                                 + Agregar Trámite
@@ -376,10 +361,6 @@
                             
                             <button @click="showExcelModal = true" class="btn-secondary" style="background: #059669; color: white;">
                                 Cargar Excel
-                            </button>
-                            
-                            <button @click="showDeleteAllModal = true" class="btn-secondary" style="background: #dc2626; color: white;">
-                                Eliminar Todos
                             </button>
                             
                             <div class="search-container">
@@ -395,17 +376,15 @@
                                 />
                             </div>
                             
-                            <!-- Contador de filas visibles -->
                             <div class="counter-text">
                                 <span x-text="`Mostrando ${visibleRows} de ${totalRows}`"></span>
                             </div>
                         </div>
 
-                        <!-- Barra de desplazamiento superior -->
                         <div class="table-scroll-top" x-ref="topScroll">
                             <div class="table-scroll-inner" x-ref="topScrollInner"></div>
                         </div>
-                        <!-- Tabla de datos -->
+
                         <div class="table-wrapper" x-ref="tableWrapper">
                             <table class="custom-table" x-ref="customTable">
                                 <thead>
@@ -496,12 +475,9 @@
                             </table>
                         </div>
                          
-                         <!-- Barra de desplazamiento inferior -->
                          <div class="table-scroll-bottom" x-ref="bottomScroll">
                              <div class="table-scroll-inner" x-ref="bottomScrollInner"></div>
                          </div>
-                         
-                        {{-- Paginación removida: listado continuo de trámites --}}
 
                         <!-- Modal Crear -->
                         <div x-show="showCreateModal" x-cloak class="modal-overlay" @click.self="showCreateModal = false">
@@ -583,8 +559,6 @@
                                         <label class="form-label">Monto IVA</label>
                                         <input type="number" step="0.01" name="monto_iva" class="form-input" />
                                     </div>
-
-                                    <!-- Inputs libres pequeños (sin placeholders) y IVA como select -->
                                       <div class="form-group">
                                           <label class="form-label">Obligatorio</label>
                                           <input type="text" name="obligatorio" class="form-input" maxlength="1" />
@@ -712,8 +686,6 @@
                                         <label class="form-label">Monto IVA</label>
                                         <input type="number" step="0.01" name="monto_iva" x-model="editData.monto_iva" class="form-input" />
                                     </div>
-
-                                    <!-- Inputs libres pequeños para S/N y 0/1 -->
                                      <div class="form-group">
                                          <label class="form-label">Obligatorio (S/N)</label>
                                          <input type="text" name="obligatorio" x-model="editData.obligatorio" class="form-input" placeholder="S/N" maxlength="1" />
@@ -755,7 +727,7 @@
                             </div>
                         </div>
 
-                        <!-- Modal Eliminar -->
+                        <!-- Modal Eliminar Individual -->
                         <div x-show="showDeleteModal" x-cloak class="modal-overlay" @click.self="showDeleteModal = false">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -801,55 +773,6 @@
                                 </form>
                             </div>
                         </div>
- 
-                        <!-- Modal para eliminar TODOS los trámites -->
-                        <div x-show="showDeleteAllModal" x-cloak class="modal-overlay" @click.self="showDeleteAllModal = false">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h3>Confirmar Eliminación Total</h3>
-                                </div>
-                                <form method="POST" action="{{ route('tramites.destroy-all') }}" class="modal-body">
-                                    @csrf
-                                    @method('DELETE')
-                                    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                                        <p class="text-red-800 font-semibold mb-2">
-                                            <strong>ADVERTENCIA CRÍTICA:</strong>
-                                        </p>
-                                        <p class="text-red-700 mb-2">
-                                            Esta acción eliminará <strong>TODOS</strong> los trámites de la base de datos de forma <strong>PERMANENTE</strong>.
-                                        </p>
-                                        <p class="text-red-700 mb-2">
-                                             • Se eliminarán <strong>{{ $tramites->count() }}</strong> trámites en total
-                                         </p>
-                                        <p class="text-red-700 mb-2">
-                                            • Los IDs se reiniciarán desde 1
-                                        </p>
-                                        <p class="text-red-700 font-semibold">
-                                            • Esta acción <strong>NO SE PUEDE DESHACER</strong>
-                                        </p>
-                                    </div>
-                                    <p class="text-gray-700 mb-4">
-                                        Si está seguro de que desea continuar, escriba <strong>"ELIMINAR TODO"</strong> en el campo de abajo:
-                                    </p>
-                                    <div class="form-group">
-                                        <input 
-                                            type="text" 
-                                            id="confirmText" 
-                                            placeholder="Escriba: ELIMINAR TODO" 
-                                            class="form-input"
-                                            required
-                                            oninput="document.getElementById('confirmDeleteAll').disabled = this.value !== 'ELIMINAR TODO'"
-                                        />
-                                    </div>
-                                    <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                                        <button type="button" @click="showDeleteAllModal = false" class="btn-secondary">Cancelar</button>
-                                        <button type="submit" id="confirmDeleteAll" disabled class="btn-delete" style="opacity: 0.5;">
-                                            Eliminar Todos los Trámites
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
 
                     </div>
                 </div>
@@ -859,31 +782,12 @@
  
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add a small delay to ensure all content is loaded
             setTimeout(function() {
                 const container = document.getElementById('tableContainer');
                 if (container) {
                     container.classList.add('loaded');
                 }
             }, 100);
-            
-            // Mejorar la funcionalidad del botón de confirmación
-            const confirmInput = document.getElementById('confirmText');
-            const confirmButton = document.getElementById('confirmDeleteAll');
-            
-            if (confirmInput && confirmButton) {
-                confirmInput.addEventListener('input', function() {
-                    if (this.value === 'ELIMINAR TODO') {
-                        confirmButton.disabled = false;
-                        confirmButton.style.opacity = '1';
-                        confirmButton.style.cursor = 'pointer';
-                    } else {
-                        confirmButton.disabled = true;
-                        confirmButton.style.opacity = '0.5';
-                        confirmButton.style.cursor = 'not-allowed';
-                    }
-                });
-            }
         });
     </script>
  </x-app-layout>
