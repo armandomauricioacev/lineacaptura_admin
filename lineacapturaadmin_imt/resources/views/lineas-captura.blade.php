@@ -1017,7 +1017,7 @@
                                     <div class="modal-body">
                                         <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.dependencia">
                                             <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-                                                <h4 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 16px;">📍 Información de la Dependencia</h4>
+                                                <h4 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 16px;">Información de la Dependencia</h4>
                                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 14px;">
                                                     <div><strong>Nombre:</strong> <span x-text="selectedDetalleSnapshot.dependencia.nombre"></span></div>
                                                     <div><strong>Clave:</strong> <span x-text="selectedDetalleSnapshot.dependencia.clave_dependencia"></span></div>
@@ -1027,25 +1027,25 @@
                                         </template>
 
                                         <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.resumen">
-                                            <div style="margin-bottom: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #22c55e;">
-                                                <h4 style="margin: 0 0 10px 0; color: #14532d; font-size: 16px;">📊 Resumen de Importes</h4>
+                                            <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                                                <h4 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 16px;">Resumen de Importes</h4>
                                                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 14px;">
                                                     <div><strong>Total Trámites:</strong> <span x-text="selectedDetalleSnapshot.resumen.total_tramites_seleccionados"></span></div>
                                                     <div><strong>Suma Cuotas:</strong> $<span x-text="parseFloat(selectedDetalleSnapshot.resumen.suma_cuotas).toFixed(2)"></span></div>
                                                     <div><strong>Suma IVA:</strong> $<span x-text="parseFloat(selectedDetalleSnapshot.resumen.suma_iva).toFixed(2)"></span></div>
-                                                    <div><strong>Gran Total:</strong> <strong style="color: #16a34a;">$<span x-text="parseFloat(selectedDetalleSnapshot.resumen.gran_total).toFixed(2)"></span></strong></div>
+                                                    <div><strong>Gran Total:</strong> <strong style="color: #0c4a6e;">$<span x-text="parseFloat(selectedDetalleSnapshot.resumen.gran_total).toFixed(2)"></span></strong></div>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.tramites">
                                             <div>
-                                                <h4 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;">📋 Trámites Seleccionados</h4>
+                                                <h4 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;">Trámites Seleccionados</h4>
                                                 <template x-for="(tramite, index) in selectedDetalleSnapshot.tramites" :key="index">
-                                                    <div style="margin-bottom: 15px; padding: 15px; background: #fefce8; border-radius: 8px; border: 1px solid #fde047;">
+                                                    <div style="margin-bottom: 15px; padding: 15px; background: #ffffff; border-radius: 8px; border: 1px solid #e5e7eb;">
                                                         <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                                                             <div style="flex: 1;">
-                                                                <h5 style="margin: 0 0 5px 0; color: #854d0e; font-size: 15px; font-weight: 600;" x-text="`${index + 1}. ${tramite.descripcion}`"></h5>
+                                                                <h5 style="margin: 0 0 5px 0; color: #1f2937; font-size: 15px; font-weight: 600;" x-text="`${index + 1}. ${tramite.descripcion}`"></h5>
                                                                 <div style="font-size: 13px; color: #78716c;">
                                                                     <span><strong>Clave:</strong> <span x-text="tramite.clave_tramite"></span></span>
                                                                     <span style="margin-left: 15px;"><strong>Variante:</strong> <span x-text="tramite.variante || 'N/A'"></span></span>
@@ -1072,9 +1072,9 @@
                                                             </div>
                                                         </div>
 
-                                                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #fde047;">
+                                                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e7eb;">
                                                             <strong style="font-size: 14px;">Total del Trámite:</strong>
-                                                            <strong style="font-size: 16px; color: #16a34a; margin-left: 10px;">$<span x-text="parseFloat(tramite.importe_total).toFixed(2)"></span></strong>
+                                                            <strong style="font-size: 16px; color: #0c4a6e; margin-left: 10px;">$<span x-text="parseFloat(tramite.importe_total).toFixed(2)"></span></strong>
                                                         </div>
 
                                                         <details style="margin-top: 10px;">
