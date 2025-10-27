@@ -21,6 +21,7 @@ class LineaCapturada extends Model
         'apellido_materno',
         'dependencia_id',
         'tramite_id',
+        'detalle_tramites_snapshot',
         'solicitud',
         'importe_cuota',
         'importe_iva',
@@ -40,5 +41,10 @@ class LineaCapturada extends Model
         'errores_sat',
         'fecha_respuesta_sat',
         'procesado_exitosamente',
+    ];
+
+     // Agregar cast para JSON
+    protected $casts = [
+        'detalle_tramites_snapshot' => 'array', // ← NUEVA LÍNEA AGREGADA
     ];
 }

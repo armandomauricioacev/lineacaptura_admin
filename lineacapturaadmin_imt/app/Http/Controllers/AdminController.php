@@ -263,6 +263,7 @@ class AdminController extends Controller
             'apellido_materno',
             'dependencia_id',
             'tramite_id',
+            'detalle_tramites_snapshot',
             'solicitud',
             'importe_cuota',
             'importe_iva',

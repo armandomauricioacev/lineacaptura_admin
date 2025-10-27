@@ -496,8 +496,10 @@
                         openRecibido: false,
                         openHtml: false,
                         openErrores: false,
+                        openDetalleSnapshot: false,
                         openDeleteModal: false,
                         openDeleteFilteredModal: false,
+                        selectedDetalleSnapshot: null,
                         selectedGenerado: null,
                         selectedRecibido: null,
                         selectedHtml: null,
@@ -777,6 +779,7 @@
                                             <th>Apellido materno</th>
                                             <th>Dependencia ID</th>
                                             <th>Trámite ID</th>
+                                            <th>Detalle Trámites</th>
                                             <th>Solicitud</th>
                                             <th>Importe cuota</th>
                                             <th>Importe IVA</th>
@@ -814,6 +817,14 @@
                                             <td>{{ $lc->apellido_materno ?: 'N/A' }}</td>
                                             <td>{{ $lc->dependencia_id }}</td>
                                             <td>{{ $lc->tramite_id }}</td>
+                                            <td>
+                                                <button @click="openModal('DetalleSnapshot', @js($lc->detalle_tramites_snapshot))" class="btn-view">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                    Ver detalle
+                                                </button>
+                                            </td>
                                             <td>{{ $lc->solicitud }}</td>
                                             <td>${{ number_format($lc->importe_cuota, 2) }}</td>
                                             <td>${{ number_format($lc->importe_iva, 2) }}</td>
@@ -879,7 +890,7 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="32" style="text-align: center; padding: 24px; color: #6b7280;">
+                                            <td colspan="33" style="text-align: center; padding: 24px; color: #6b7280;">
                                                 No hay líneas de captura registradas.
                                             </td>
                                         </tr>
@@ -984,6 +995,125 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button @click="closeModal('Errores')" class="btn-primary">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Detalle Trámites Snapshot -->
+                            <div x-show="openDetalleSnapshot" 
+                                x-cloak
+                                @click="closeModal('DetalleSnapshot')"
+                                class="modal-overlay"
+                                style="display: none;">
+                                <div @click.stop class="modal-content" style="max-width: 900px;">
+                                    <div class="modal-header">
+                                        <h3>Detalle de Trámites (Snapshot Estático)</h3>
+                                        <button @click="closeModal('DetalleSnapshot')" class="btn-close">
+                                            <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.dependencia">
+                                            <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                                                <h4 style="margin: 0 0 10px 0; color: #0c4a6e; font-size: 16px;">📍 Información de la Dependencia</h4>
+                                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 14px;">
+                                                    <div><strong>Nombre:</strong> <span x-text="selectedDetalleSnapshot.dependencia.nombre"></span></div>
+                                                    <div><strong>Clave:</strong> <span x-text="selectedDetalleSnapshot.dependencia.clave_dependencia"></span></div>
+                                                    <div style="grid-column: 1 / -1;"><strong>Unidad Administrativa:</strong> <span x-text="selectedDetalleSnapshot.dependencia.unidad_administrativa"></span></div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.resumen">
+                                            <div style="margin-bottom: 20px; padding: 15px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #22c55e;">
+                                                <h4 style="margin: 0 0 10px 0; color: #14532d; font-size: 16px;">📊 Resumen de Importes</h4>
+                                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 14px;">
+                                                    <div><strong>Total Trámites:</strong> <span x-text="selectedDetalleSnapshot.resumen.total_tramites_seleccionados"></span></div>
+                                                    <div><strong>Suma Cuotas:</strong> $<span x-text="parseFloat(selectedDetalleSnapshot.resumen.suma_cuotas).toFixed(2)"></span></div>
+                                                    <div><strong>Suma IVA:</strong> $<span x-text="parseFloat(selectedDetalleSnapshot.resumen.suma_iva).toFixed(2)"></span></div>
+                                                    <div><strong>Gran Total:</strong> <strong style="color: #16a34a;">$<span x-text="parseFloat(selectedDetalleSnapshot.resumen.gran_total).toFixed(2)"></span></strong></div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.tramites">
+                                            <div>
+                                                <h4 style="margin: 0 0 15px 0; color: #374151; font-size: 16px;">📋 Trámites Seleccionados</h4>
+                                                <template x-for="(tramite, index) in selectedDetalleSnapshot.tramites" :key="index">
+                                                    <div style="margin-bottom: 15px; padding: 15px; background: #fefce8; border-radius: 8px; border: 1px solid #fde047;">
+                                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                                            <div style="flex: 1;">
+                                                                <h5 style="margin: 0 0 5px 0; color: #854d0e; font-size: 15px; font-weight: 600;" x-text="`${index + 1}. ${tramite.descripcion}`"></h5>
+                                                                <div style="font-size: 13px; color: #78716c;">
+                                                                    <span><strong>Clave:</strong> <span x-text="tramite.clave_tramite"></span></span>
+                                                                    <span style="margin-left: 15px;"><strong>Variante:</strong> <span x-text="tramite.variante || 'N/A'"></span></span>
+                                                                </div>
+                                                            </div>
+                                                            <div style="text-align: right; background: white; padding: 8px 12px; border-radius: 6px;">
+                                                                <div style="font-size: 12px; color: #6b7280;">Cantidad</div>
+                                                                <div style="font-size: 18px; font-weight: bold; color: #1f2937;" x-text="tramite.cantidad"></div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; margin-top: 10px;">
+                                                            <div>
+                                                                <strong>Cuota Unitaria:</strong><br>
+                                                                $<span x-text="parseFloat(tramite.cuota_unitaria).toFixed(2)"></span>
+                                                            </div>
+                                                            <div>
+                                                                <strong>Cuota Total:</strong><br>
+                                                                $<span x-text="parseFloat(tramite.importe_cuota_total).toFixed(2)"></span>
+                                                            </div>
+                                                            <div>
+                                                                <strong>IVA:</strong><br>
+                                                                $<span x-text="parseFloat(tramite.importe_iva_total).toFixed(2)"></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #fde047;">
+                                                            <strong style="font-size: 14px;">Total del Trámite:</strong>
+                                                            <strong style="font-size: 16px; color: #16a34a; margin-left: 10px;">$<span x-text="parseFloat(tramite.importe_total).toFixed(2)"></span></strong>
+                                                        </div>
+
+                                                        <details style="margin-top: 10px;">
+                                                            <summary style="cursor: pointer; color: #0369a1; font-size: 13px; font-weight: 600;">Ver información adicional</summary>
+                                                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 6px; font-size: 12px; color: #4b5563;">
+                                                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                                                                    <div><strong>Fundamento Legal:</strong> <span x-text="tramite.fundamento_legal || 'N/A'"></span></div>
+                                                                    <div><strong>Vigencia De:</strong> <span x-text="tramite.vigencia_tramite_de || 'N/A'"></span></div>
+                                                                    <div><strong>Vigencia Al:</strong> <span x-text="tramite.vigencia_tramite_al || 'N/A'"></span></div>
+                                                                    <div><strong>Tipo Vigencia:</strong> <span x-text="tramite.tipo_vigencia || 'N/A'"></span></div>
+                                                                    <div><strong>Clave Contable:</strong> <span x-text="tramite.clave_contable || 'N/A'"></span></div>
+                                                                    <div><strong>Agrupador:</strong> <span x-text="tramite.agrupador || 'N/A'"></span></div>
+                                                                    <div><strong>Obligatorio:</strong> <span x-text="tramite.obligatorio || 'N/A'"></span></div>
+                                                                    <div><strong>Variable:</strong> <span x-text="tramite.variable || 'N/A'"></span></div>
+                                                                </div>
+                                                            </div>
+                                                        </details>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="!selectedDetalleSnapshot || !selectedDetalleSnapshot.tramites">
+                                            <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                                                <svg style="width: 48px; height: 48px; margin: 0 auto 10px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                                <p style="margin: 0;">No hay información de snapshot disponible para esta línea de captura.</p>
+                                            </div>
+                                        </template>
+
+                                        <template x-if="selectedDetalleSnapshot && selectedDetalleSnapshot.fecha_generacion">
+                                            <div style="margin-top: 20px; padding: 10px; background: #f3f4f6; border-radius: 6px; text-align: center; font-size: 12px; color: #6b7280;">
+                                                <strong>Snapshot generado el:</strong> <span x-text="selectedDetalleSnapshot.fecha_generacion"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button @click="closeModal('DetalleSnapshot')" class="btn-primary">Cerrar</button>
                                     </div>
                                 </div>
                             </div>
