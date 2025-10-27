@@ -509,7 +509,7 @@
                         totalRows: {{ $totalLineas }},
                         filteredRows: {{ $lineas->count() }},
                         showFilters: false,
-                        filters: {
+                    filters: {
                             tipoPersona: '{{ request('tipo_persona', '') }}',
                             estadoPago: '{{ request('estado_pago', '') }}',
                             importeMin: '{{ request('importe_min', '') }}',
@@ -519,6 +519,23 @@
                             orden: '{{ request('orden', 'recientes') }}'
                         },
                         searchValue: '{{ request('search', '') }}',
+                        normalize(text) {
+                            return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                        },
+                        filterRows() {
+                            const query = this.normalize(this.searchValue);
+                            const body = this.$refs.tableBody;
+                            if (!body) return;
+                            const rows = body.querySelectorAll('tr[data-row]');
+                            let visible = 0;
+                            rows.forEach(row => {
+                                const rowText = this.normalize(row.textContent);
+                                const matches = query ? rowText.includes(query) : true;
+                                row.style.display = matches ? '' : 'none';
+                                if (matches) visible++;
+                            });
+                            this.filteredRows = visible;
+                        },
                         formatJson(value) {
                             if (!value) return 'Sin datos';
                             try {
@@ -640,7 +657,7 @@
                                 if (wrapper) wrapper.addEventListener('scroll', onWrapperScroll);
                             });
                         }
-                    }" x-init="initScrollSync()">
+                    }" x-init="initScrollSync(); filterRows()">
                     
                         @if(session('success'))
                             <div class="alert alert-success">
@@ -672,6 +689,7 @@
                                             type="text" 
                                             name="search"
                                             x-model="searchValue"
+                                            @input="filterRows()"
                                             placeholder="Buscar líneas de captura..." 
                                             class="search-input"
                                         />
