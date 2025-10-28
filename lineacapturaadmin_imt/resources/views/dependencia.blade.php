@@ -16,7 +16,7 @@
         
         .custom-table {
             width: 100%;
-            min-width: 1400px; /* Asegura overflow horizontal para scroll */
+            min-width: 0; /* Evita overflow horizontal, ajusta al contenedor */
             border-collapse: collapse;
             background: white;
             border-radius: 8px;
@@ -40,7 +40,8 @@
         .custom-table td {
             padding: 12px 16px;
             border-bottom: 1px solid #f3f4f6;
-            white-space: nowrap;
+            white-space: normal; /* Permite envolver contenido */
+            word-break: break-word; /* Corta palabras largas */
         }
         
         .custom-table tr:hover {
@@ -50,7 +51,7 @@
         /* Contenedor interno de la tabla: scroll horizontal táctil, sin barra interna */
         .table-wrapper {
             width: 100%;
-            overflow-x: auto;
+            overflow-x: hidden; /* Evita el slidebar horizontal */
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
             border: 1px solid #e5e7eb;
@@ -274,76 +275,13 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" style="min-height: 600px;">
                 <div class="p-6 text-gray-900 min-w-full table-container" id="tableContainer">
                     <div x-data="{
-                        searchQuery: '',
-                        totalRows: {{ $dependencias->count() }},
-                        visibleRows: {{ $dependencias->count() }},
-                        showCreateModal: false,
                         showEditModal: false,
-                        showDeleteModal: false,
                         editData: {},
-                        deleteData: {},
-                        normalize(text) {
-                            return String(text || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        },
-                        filterRows() {
-                            const query = this.normalize(this.searchQuery);
-                            const rows = this.$refs.tableBody.querySelectorAll('tr');
-                            let visible = 0;
-                            
-                            rows.forEach(row => {
-                                const cells = row.querySelectorAll('td');
-                                let matchesSearch = true;
-                                
-                                if (query) {
-                                    const rowText = Array.from(cells).map(cell => this.normalize(cell.textContent)).join(' ');
-                                    matchesSearch = rowText.includes(query);
-                                }
-                                
-                                if (matchesSearch) {
-                                    row.style.display = '';
-                                    visible++;
-                                } else {
-                                    row.style.display = 'none';
-                                }
-                            });
-                            this.visibleRows = visible;
-                        },
                         openEditModal(id, nombre, clave, unidad) {
                             this.editData = { id, nombre, clave, unidad };
                             this.showEditModal = true;
-                        },
-                        openDeleteModal(id, nombre) {
-                            this.deleteData = { id, nombre };
-                            this.showDeleteModal = true;
-                        },
-                        initScrollSync() {
-                            this.$nextTick(() => {
-                                const top = this.$refs.topScroll;
-                                const innerTop = this.$refs.topScrollInner;
-                                const bottom = this.$refs.bottomScroll;
-                                const innerBottom = this.$refs.bottomScrollInner;
-                                const wrapper = this.$refs.tableWrapper;
-                                const table = this.$refs.customTable;
-                                const updateWidths = () => {
-                                    if (table) {
-                                        const w = table.scrollWidth;
-                                        if (innerTop) { innerTop.style.width = w + 'px'; innerTop.style.height = '1px'; }
-                                        if (innerBottom) { innerBottom.style.width = w + 'px'; innerBottom.style.height = '1px'; }
-                                    }
-                                };
-                                updateWidths();
-                                window.addEventListener('resize', updateWidths);
-                                let syncing = false;
-                                const setScroll = (el, val) => { if (el && el.scrollLeft !== val) el.scrollLeft = val; };
-                                const onTopScroll = () => { if (syncing) return; syncing = true; setScroll(wrapper, top.scrollLeft); setScroll(bottom, top.scrollLeft); syncing = false; };
-                                const onBottomScroll = () => { if (syncing) return; syncing = true; setScroll(wrapper, bottom.scrollLeft); setScroll(top, bottom.scrollLeft); syncing = false; };
-                                const onWrapperScroll = () => { if (syncing) return; syncing = true; setScroll(top, wrapper.scrollLeft); setScroll(bottom, wrapper.scrollLeft); syncing = false; };
-                                if (top) top.addEventListener('scroll', onTopScroll);
-                                if (bottom) bottom.addEventListener('scroll', onBottomScroll);
-                                if (wrapper) wrapper.addEventListener('scroll', onWrapperScroll);
-                            });
                         }
-                    }" x-init="filterRows(); initScrollSync()">
+                    }">
                     
                     <!-- Mensajes de éxito/error -->
                     @if(session('success'))
@@ -368,35 +306,10 @@
                         </div>
                     @endif
 
-                    <!-- Controles superiores -->
-                    <div class="controls-container">
-                        <button @click="showCreateModal = true" class="btn-primary">
-                            + Agregar Dependencia
-                        </button>
-                        
-                        <div class="search-container">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                            <input 
-                                type="text" 
-                                x-model="searchQuery"
-                                @input="filterRows()"
-                                placeholder="Buscar dependencias..." 
-                                class="search-input"
-                            />
-                        </div>
-                        
-                        <!-- Contador de filas visibles -->
-                        <div class="counter-text">
-                            <span x-text="`Mostrando ${visibleRows} de ${totalRows}`"></span>
-                        </div>
-                    </div>
+                    <!-- Controles superiores removidos: sin barra de búsqueda, solo tabla -->
 
                     <!-- Tabla de datos -->
-                    <div class="table-scroll-top" x-ref="topScroll">
-                        <div class="table-scroll-inner" x-ref="topScrollInner"></div>
-                    </div>
+                    <!-- Barra superior de scroll removida -->
                     <div class="table-wrapper" x-ref="tableWrapper">
                         <table class="custom-table" x-ref="customTable">
                             <thead>
@@ -424,9 +337,7 @@
                                             <button @click="openEditModal({{ $dep->id }}, '{{ addslashes($dep->nombre) }}', '{{ addslashes($dep->clave_dependencia) }}', '{{ addslashes($dep->unidad_administrativa ?? '') }}')" class="btn-edit">
                                                 Editar
                                             </button>
-                                            <button @click="openDeleteModal({{ $dep->id }}, '{{ addslashes($dep->nombre) }}')" class="btn-delete">
-                                                Eliminar
-                                            </button>
+                                            <!-- Botón Eliminar removido; se mantiene solo Editar -->
                                         </div>
                                     </td>
                                 </tr>
@@ -448,33 +359,7 @@
                         </div>
                     @endif
 
-                    <!-- Modal Crear -->
-                    <div x-show="showCreateModal" x-cloak class="modal-overlay" @click.self="showCreateModal = false">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3 class="text-lg font-semibold">Crear Nueva Dependencia</h3>
-                            </div>
-                            <form method="POST" action="{{ route('dependencias.store') }}" class="modal-body">
-                                @csrf
-                                <div class="form-group">
-                                    <label class="form-label">Nombre *</label>
-                                    <input type="text" name="nombre" class="form-input" required />
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Clave dependencia *</label>
-                                    <input type="text" name="clave_dependencia" class="form-input" required />
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Unidad administrativa</label>
-                                    <input type="text" name="unidad_administrativa" class="form-input" />
-                                </div>
-                                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                                    <button type="button" @click="showCreateModal = false" class="btn-secondary">Cancelar</button>
-                                    <button type="submit" class="btn-primary">Crear</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                    <!-- Modal Crear removido -->
 
                     <!-- Modal Editar -->
                     <div x-show="showEditModal" x-cloak class="modal-overlay" @click.self="showEditModal = false">
@@ -505,24 +390,7 @@
                         </div>
                     </div>
 
-                    <!-- Modal Eliminar -->
-                    <div x-show="showDeleteModal" x-cloak class="modal-overlay" @click.self="showDeleteModal = false">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h3 class="text-lg font-semibold">Eliminar Dependencia #<span x-text="deleteData.id"></span></h3>
-                            </div>
-                            <div class="modal-body">
-                                <p class="text-gray-700 mb-6">¿Está seguro de que desea eliminar la dependencia "<span x-text="deleteData.nombre" class="font-semibold"></span>"?</p>
-                                <p class="text-sm text-red-600 mb-6">Esta acción no se puede deshacer.</p>
-                                <form method="POST" :action="`/dependencias/${deleteData.id}`" style="display: flex; justify-content: flex-end; gap: 12px;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" @click="showDeleteModal = false" class="btn-secondary">Cancelar</button>
-                                    <button type="submit" class="btn-delete">Eliminar</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Modal Eliminar removido -->
                     
                     </div>
                 </div>
