@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Log;
 class ExcelController extends Controller
 {
     /**
-     * Procesa la carga del archivo Excel de trámites
+     * Procesa archivo Excel de trámites.
+     *
+     * @param Request $request Archivo Excel recibido por formulario.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito o error.
      */
     public function uploadTramites(Request $request)
     {
@@ -146,15 +149,15 @@ class ExcelController extends Controller
                 return back()->withErrors(['excel_error' => $errorMessage]);
             }
 
-            // Si no hay errores, proceder con la transacción
+            // ELIMINAR TODOS LOS TRÁMITES EXISTENTES ANTES DE CARGAR LOS NUEVOS
+            // Usar DELETE en lugar de TRUNCATE debido a restricciones de clave foránea
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            Tramite::query()->delete();
+            DB::statement('ALTER TABLE tramites AUTO_INCREMENT = 1;');
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            // Insertar los nuevos trámites dentro de una transacción
             DB::transaction(function () use ($tramitesData) {
-                // ELIMINAR TODOS LOS TRÁMITES EXISTENTES ANTES DE CARGAR LOS NUEVOS
-                // Usar DELETE en lugar de TRUNCATE debido a restricciones de clave foránea
-                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-                Tramite::query()->delete();
-                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-                
-                // Insertar los nuevos trámites
                 foreach ($tramitesData as $tramiteData) {
                     Tramite::create($tramiteData);
                 }
@@ -169,7 +172,11 @@ class ExcelController extends Controller
     }
 
     /**
-     * Valida los datos de un trámite
+     * Valida datos de un trámite extraídos del Excel.
+     *
+     * @param array $data Datos normalizados del trámite.
+     * @param int $rowNumber Número de fila en el Excel.
+     * @return array Lista de mensajes de error; vacío si todo es válido.
      */
     private function validarTramite($data, $rowNumber)
     {
@@ -204,7 +211,10 @@ class ExcelController extends Controller
     }
 
     /**
-     * Convierte una fecha de Excel a formato Y-m-d
+     * Convierte valor Excel a fecha 'Y-m-d'.
+     *
+     * @param mixed $value Valor crudo de celda.
+     * @return string|null Fecha formateada o null si no válida.
      */
     private function parseDate($value)
     {
@@ -252,7 +262,10 @@ class ExcelController extends Controller
     }
 
     /**
-     * Convierte un valor a numérico
+     * Convierte valor a número float.
+     *
+     * @param mixed $value Valor crudo de celda.
+     * @return float|null Número convertido o null si no válido.
      */
     private function parseNumeric($value)
     {
@@ -272,7 +285,10 @@ class ExcelController extends Controller
     }
 
     /**
-     * Convierte un valor a booleano
+     * Normaliza un valor textual/numérico a booleano.
+     *
+     * @param mixed $value Valor crudo de celda.
+     * @return bool Verdadero si coincide con valores activos.
      */
     private function parseBoolean($value)
     {

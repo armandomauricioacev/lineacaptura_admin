@@ -43,8 +43,8 @@ class LineaCapturada extends Model
         'procesado_exitosamente',
     ];
 
-     // Agregar cast para JSON
+     // Cast de atributos JSON
     protected $casts = [
-        'detalle_tramites_snapshot' => 'array', // ← NUEVA LÍNEA AGREGADA
+        'detalle_tramites_snapshot' => 'array',
     ];
 }

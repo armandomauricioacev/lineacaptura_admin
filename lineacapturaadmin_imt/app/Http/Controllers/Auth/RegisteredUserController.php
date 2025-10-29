@@ -16,6 +16,8 @@ class RegisteredUserController extends Controller
 {
     /**
      * Muestra la vista de registro.
+     *
+     * @return View Página de registro.
      */
     public function create(): View
     {
@@ -25,6 +27,8 @@ class RegisteredUserController extends Controller
     /**
      * Registra al usuario y lo autentica.
      *
+     * @param Request $request Datos validados del registro.
+     * @return RedirectResponse Redirección al dashboard tras registro.
      * @throws \Illuminate\Validation\ValidationException
      */
     public function store(Request $request): RedirectResponse

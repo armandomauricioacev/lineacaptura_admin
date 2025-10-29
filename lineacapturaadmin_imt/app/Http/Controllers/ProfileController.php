@@ -13,6 +13,9 @@ class ProfileController extends Controller
 {
     /**
      * Muestra el formulario de perfil del usuario.
+     *
+     * @param Request $request Solicitud actual con usuario autenticado.
+     * @return View Vista de edición de perfil.
      */
     public function edit(Request $request): View
     {
@@ -23,6 +26,9 @@ class ProfileController extends Controller
 
     /**
      * Actualiza la información del perfil del usuario.
+     *
+     * @param ProfileUpdateRequest $request Datos validados del perfil.
+     * @return RedirectResponse Redirección con estado de actualización.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -39,6 +45,9 @@ class ProfileController extends Controller
 
     /**
      * Elimina la cuenta del usuario.
+     *
+     * @param Request $request Solicitud con credenciales y sesión.
+     * @return RedirectResponse Redirección a inicio tras eliminar.
      */
     public function destroy(Request $request): RedirectResponse
     {

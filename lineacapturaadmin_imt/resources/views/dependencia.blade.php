@@ -201,6 +201,9 @@
         .modal-header {
             padding: 20px 24px;
             border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .modal-body {
@@ -268,6 +271,8 @@
             color: #991b1b;
             border: 1px solid #fca5a5;
         }
+        .btn-close { color: #9ca3af; background: none; border: none; cursor: pointer; padding: 4px; transition: color 0.2s; }
+        .btn-close:hover { color: #6b7280; }
     </style>
 
     <div class="py-12">
@@ -366,6 +371,11 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h3 class="text-lg font-semibold">Editar Dependencia #<span x-text="editData.id"></span></h3>
+                                <button @click="showEditModal = false" class="btn-close" aria-label="Cerrar">
+                                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
                             <form method="POST" :action="`/dependencias/${editData.id}`" class="modal-body">
                                 @csrf

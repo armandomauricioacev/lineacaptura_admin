@@ -16,6 +16,8 @@ class AdminController extends Controller
 
     /**
      * Listado de dependencias.
+     *
+     * @return \Illuminate\View\View Vista con paginación de dependencias.
      */
     public function dependenciasIndex()
     {
@@ -27,6 +29,9 @@ class AdminController extends Controller
 
     /**
      * Crea una nueva dependencia.
+     *
+     * @param Request $request Datos validados del formulario.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function dependenciaStore(Request $request)
     {
@@ -44,6 +49,10 @@ class AdminController extends Controller
 
     /**
      * Actualiza una dependencia.
+     *
+     * @param Request $request Datos a actualizar.
+     * @param Dependencia $dependencia Modelo a modificar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function dependenciaUpdate(Request $request, Dependencia $dependencia)
     {
@@ -61,6 +70,9 @@ class AdminController extends Controller
 
     /**
      * Elimina una dependencia.
+     *
+     * @param Dependencia $dependencia Modelo a eliminar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function dependenciaDestroy(Dependencia $dependencia)
     {
@@ -76,6 +88,8 @@ class AdminController extends Controller
 
     /**
      * Listado de trámites.
+     *
+     * @return \Illuminate\View\View Vista con trámites ordenados.
      */
     public function tramitesIndex()
     {
@@ -118,6 +132,9 @@ class AdminController extends Controller
 
     /**
      * Crea un trámite.
+     *
+     * @param Request $request Datos del trámite.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function tramitesStore(Request $request)
     {
@@ -158,6 +175,10 @@ class AdminController extends Controller
 
     /**
      * Actualiza un trámite.
+     *
+     * @param Request $request Campos a actualizar.
+     * @param Tramite $tramite Modelo a modificar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function tramitesUpdate(Request $request, Tramite $tramite)
     {
@@ -198,6 +219,9 @@ class AdminController extends Controller
 
     /**
      * Devuelve datos de un trámite para edición (JSON).
+     *
+     * @param Tramite $tramite Modelo a consultar.
+     * @return \Illuminate\Http\JsonResponse Campos habilitados para edición.
      */
     public function tramitesEdit(Tramite $tramite)
     {
@@ -234,6 +258,9 @@ class AdminController extends Controller
 
     /**
      * Elimina un trámite.
+     *
+     * @param Tramite $tramite Modelo a eliminar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function tramitesDestroy(Tramite $tramite)
     {
@@ -249,6 +276,9 @@ class AdminController extends Controller
 
     /**
      * Listado de líneas de captura con filtros aplicados.
+     *
+     * @param Request $request Filtros y orden.
+     * @return \Illuminate\View\View Vista con resultados y total.
      */
     public function lineasCapturadasIndex(Request $request)
     {
@@ -345,6 +375,9 @@ class AdminController extends Controller
 
     /**
      * Elimina una línea de captura individual.
+     *
+     * @param LineaCapturada $linea Modelo a eliminar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con mensaje de éxito.
      */
     public function lineaCapturaDestroy(LineaCapturada $linea)
     {
@@ -356,6 +389,9 @@ class AdminController extends Controller
     /**
      * Elimina líneas de captura por filtros múltiples.
      * Solo se ejecuta cuando hay filtros activos.
+     *
+     * @param Request $request Filtros a aplicar.
+     * @return \Illuminate\Http\RedirectResponse Redirección con conteo o error.
      */
     public function lineasCapturaDeleteFiltered(Request $request)
     {

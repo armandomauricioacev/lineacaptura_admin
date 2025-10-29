@@ -207,7 +207,7 @@
         .btn-secondary:hover { background: #4b5563; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
         .modal-content { background: white; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
-        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 24px; }
         .form-group { margin-bottom: 16px; }
         .form-label { display: block; font-size: 14px; font-weight: 500; color: #374151; margin-bottom: 6px; }
@@ -216,6 +216,8 @@
         .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; font-size: 14px; }
         .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
         .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .btn-close { color: #9ca3af; background: none; border: none; cursor: pointer; padding: 4px; transition: color 0.2s; }
+        .btn-close:hover { color: #6b7280; }
     </style>
 
     <div class="py-12">
@@ -484,6 +486,11 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h3 class="text-lg font-semibold">Crear Nuevo Trámite</h3>
+                                    <button @click="showCreateModal = false" class="btn-close" aria-label="Cerrar">
+                                        <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <form method="POST" action="{{ route('tramites.store') }}" class="modal-body" x-ref="createForm" @submit.prevent="validateCreateForm()">
                                     @csrf
@@ -610,6 +617,11 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h3 class="text-lg font-semibold">Editar Trámite #<span x-text="editData.id"></span></h3>
+                                    <button @click="showEditModal = false" class="btn-close" aria-label="Cerrar">
+                                        <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <form method="POST" :action="`/tramites/${editData.id}`" class="modal-body">
                                     @csrf
@@ -732,6 +744,11 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h3 class="text-lg font-semibold">Eliminar Trámite #<span x-text="deleteData.id"></span></h3>
+                                    <button @click="showDeleteModal = false" class="btn-close" aria-label="Cerrar">
+                                        <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <div class="modal-body">
                                     <p class="text-gray-700 mb-6">¿Está seguro de que desea eliminar el trámite "<span x-text="deleteData.descripcion" class="font-semibold"></span>"?</p>
@@ -751,6 +768,11 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h3 class="text-lg font-semibold">Cargar Trámites desde Excel</h3>
+                                    <button @click="showExcelModal = false" class="btn-close" aria-label="Cerrar">
+                                        <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
                                 </div>
                                 <form method="POST" action="{{ route('excel.upload-tramites') }}" enctype="multipart/form-data" class="modal-body">
                                     @csrf
